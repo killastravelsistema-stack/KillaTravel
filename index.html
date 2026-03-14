@@ -240,7 +240,7 @@
   </div>
 
   <aside class="sidebar">
-    <div class="brand-box">
+    <div class="brand-box" style="background: #e0f2fe; border-radius: 12px; margin-bottom: 25px;">
       <img src="https://i.ibb.co/SScGQck/logo-killa.png" class="logo-img" alt="Logo Killa" onerror="this.src='https://via.placeholder.com/180x100?text=KILLA+TRAVEL'">
     </div>
     <nav class="nav-menu">
@@ -421,15 +421,15 @@
         <div id="boletos-scroll-main" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
           <table id="boletos-tabla" style="width: 100%; min-width: 1200px; border-collapse: collapse; table-layout: fixed;">
             <thead>
-              <tr>
-                <th style="width: 80px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">FECHA</th>
-                <th style="width: 120px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">N° DOC</th>
-                <th style="width: 170px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">COMPRADOR</th>
-                <th style="width: 110px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">RUTA</th>
-                <th style="width: 200px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">PAX</th>
-                <th style="width: 80px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">TOTAL</th>
-                <th style="width: 110px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">COUNTER</th>
-                <th style="width: 170px; background: var(--fondo); padding: 12px 10px; text-align: center; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">ACCIONES</th>
+              <tr style="background: #e0f2fe;">
+                <th style="width: 80px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">FECHA</th>
+                <th style="width: 120px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">N° DOC</th>
+                <th style="width: 170px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">COMPRADOR</th>
+                <th style="width: 110px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">RUTA</th>
+                <th style="width: 200px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">PAX</th>
+                <th style="width: 80px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">TOTAL</th>
+                <th style="width: 110px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">COUNTER</th>
+                <th style="width: 170px; padding: 12px 10px; text-align: center; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">ACCIONES</th>
               </tr>
             </thead>
             <tbody id="lista-boletos">
@@ -485,7 +485,7 @@
         </div>
         <div id="datos-btn-group" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <select id="filtro-mes" onchange="filtrarPorMes()" style="padding:10px 14px;border:2px solid var(--borde-notorio);border-radius:8px;font-size:13px;font-weight:600;background:#fff;color:#1e293b;outline:none;">
-            <option value="">— Todos los meses —</option>
+            <option value="" selected>— Todos los meses —</option>
             <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
             <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
             <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
@@ -1056,6 +1056,13 @@
         '<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--texto-gris);">Cargando boletos...</td></tr>';
       try {
         db = await _fetchVentas();
+        // SORT BOLETOS: Newest to Oldest (Recientes a más antiguos)
+        db.sort(function(a, b) {
+          var d1 = _parseFecha(a.fecha) || new Date(0);
+          var d2 = _parseFecha(b.fecha) || new Date(0);
+          if (d1.getTime() === d2.getTime()) return (b.correlativo || 0) - (a.correlativo || 0); // Stable sort fallback
+          return d2 - d1;
+        });
         renderBoletos();
       } catch(err) {
         document.getElementById('lista-boletos').innerHTML =
@@ -1643,11 +1650,12 @@
         return;
       }
 
-      // Ordenar por fecha cronológicamente (más reciente primero) para agrupar bien los meses
+      // Ordenar por fecha cronológicamente (más antiguo primero) para agrupar bien los meses (Antiguos a más recientes)
       var sortedRows = rows.slice().sort(function(a, b) {
         var d1 = _parseFecha(a.fecha) || new Date(0);
         var d2 = _parseFecha(b.fecha) || new Date(0);
-        return d2 - d1;
+        if (d1.getTime() === d2.getTime()) return (a.correlativo||0) - (b.correlativo||0); // Stable sort fallback
+        return d1 - d2;
       });
 
       // Banner de bloqueo para montos admin
