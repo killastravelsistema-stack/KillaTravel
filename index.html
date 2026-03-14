@@ -16,7 +16,7 @@
     :root {
       --primario: #1e293b; 
       --acento: #0ea5e9;
-      --fondo: #f1f5f9;
+      --fondo: #f0f9ff;
       --blanco: #ffffff;
       --borde: #e2e8f0;
       --borde-notorio: #94a3b8;
@@ -240,7 +240,7 @@
   </div>
 
   <aside class="sidebar">
-    <div class="brand-box">
+    <div class="brand-box" style="background: #e0f2fe; border-radius: 12px; margin-bottom: 25px;">
       <img src="https://i.ibb.co/SScGQck/logo-killa.png" class="logo-img" alt="Logo Killa" onerror="this.src='https://via.placeholder.com/180x100?text=KILLA+TRAVEL'">
     </div>
     <nav class="nav-menu">
@@ -249,7 +249,7 @@
       <div class="menu-item" onclick="ir('boletos', this)"><i data-lucide="file-text"></i><span>Boletos</span></div>
       <div class="menu-item" onclick="ir('check', this)"><i data-lucide="bell-ring"></i><span>Alertas</span></div>
       <div class="menu-item" onclick="ir('pax', this)"><i data-lucide="users"></i><span>Pasajeros</span></div>
-      <div class="menu-item" onclick="abrirDatos(this)"><i data-lucide="database"></i><span>Datos</span></div>
+      <div class="menu-item" onclick="abrirDatos(this)"><i data-lucide="database"></i><span>Base de Datos</span></div>
     </nav>
     <div class="sidebar-footer"><b>Admin:</b> Guissel Carla Luna Quispe</div>
   </aside>
@@ -421,15 +421,15 @@
         <div id="boletos-scroll-main" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
           <table id="boletos-tabla" style="width: 100%; min-width: 1200px; border-collapse: collapse; table-layout: fixed;">
             <thead>
-              <tr>
-                <th style="width: 80px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">FECHA</th>
-                <th style="width: 120px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">N° DOC</th>
-                <th style="width: 170px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">COMPRADOR</th>
-                <th style="width: 110px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">RUTA</th>
-                <th style="width: 200px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">PAX</th>
-                <th style="width: 80px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">TOTAL</th>
-                <th style="width: 110px; background: var(--fondo); padding: 12px 10px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">COUNTER</th>
-                <th style="width: 170px; background: var(--fondo); padding: 12px 10px; text-align: center; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">ACCIONES</th>
+              <tr style="background: #e0f2fe;">
+                <th style="width: 80px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">FECHA</th>
+                <th style="width: 120px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">N° DOC</th>
+                <th style="width: 170px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">COMPRADOR</th>
+                <th style="width: 110px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">RUTA</th>
+                <th style="width: 200px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">PAX</th>
+                <th style="width: 80px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">TOTAL</th>
+                <th style="width: 110px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">COUNTER</th>
+                <th style="width: 170px; padding: 12px 10px; text-align: center; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">ACCIONES</th>
               </tr>
             </thead>
             <tbody id="lista-boletos">
@@ -442,8 +442,13 @@
 
     <!-- SECCIÓN CHECK-IN -->
     <section id="check" class="seccion">
-      <h1 style="margin-bottom: 8px; font-weight: 700; color: var(--primario);">Control de Check-in</h1>
-      <p style="color:var(--texto-gris); font-size:13px; margin-bottom:20px;">Alertas de vuelos próximos (0-2 días)</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+        <div>
+          <h1 style="font-weight:700;color:var(--primario);">Control de Check-in</h1>
+          <p style="color:var(--texto-gris);font-size:13px;">Alertas de vuelos próximos (0-2 días) — Salida y Retorno</p>
+        </div>
+        <button onclick="descargarCheckin()" style="background:#0284c7;color:white;border:none;padding:11px 20px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;"><i data-lucide="download" size="16"></i> Descargar Check-in</button>
+      </div>
       <div style="background:#e0f2fe; border-left:4px solid #0ea5e9; padding:12px 20px; border-radius:8px; margin-bottom:20px; font-size:13px; color:#075985;">
         <b>Nota:</b> Se generan alertas separadas para fechas de salida y retorno cuando faltan 2 días o menos.
       </div>
@@ -475,10 +480,17 @@
     <section id="datos" class="seccion">
       <div class="seccion-datos-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:15px; margin-bottom:10px;">
         <div>
-          <h1 style="margin-bottom: 4px; font-weight: 700; color: var(--primario);">Registros Completos</h1>
+          <h1 style="margin-bottom: 4px; font-weight: 700; color: var(--primario);">Base de Datos</h1>
           <p style="color:var(--texto-gris); font-size:13px;">Todos los campos de cada pasajero registrado</p>
         </div>
         <div id="datos-btn-group" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <select id="filtro-mes" onchange="filtrarPorMes()" style="padding:10px 14px;border:2px solid var(--borde-notorio);border-radius:8px;font-size:13px;font-weight:600;background:#fff;color:#1e293b;outline:none;">
+            <option value="" selected>— Todos los meses —</option>
+            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+            <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+            <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+            <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
           <button onclick="cargarDatos()" style="background:var(--acento);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;"><i data-lucide="refresh-cw" size="16"></i> Actualizar</button>
           <button onclick="abrirImportar()" style="background:#7c3aed;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;"><i data-lucide="upload" size="16"></i> Importar GS</button>
           <button onclick="exportarCSV()" style="background:var(--exito);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;"><i data-lucide="download" size="16"></i> CSV</button>
@@ -530,6 +542,8 @@
                 <th style="width:85px; background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">NETO $</th>
                 <th style="width:85px; background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">COBRADO $</th>
                 <th style="width:85px; background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">IMP.IND.$</th>
+                <th style="width:90px; background:var(--fondo);padding:12px 10px;text-align:center;font-weight:700;font-size:10px;color:#10b981;text-transform:uppercase;white-space:nowrap;">EDITAR</th>
+                <th style="width:150px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:#0369a1;text-transform:uppercase;white-space:nowrap;">OBSERVACIÓN</th>
               </tr>
             </thead>
             <tbody id="lista-datos">
@@ -540,6 +554,47 @@
       </div>
     </section>
   </main>
+
+  <!-- MODAL EDITAR REGISTRO -->
+  <div id="modalEditar" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:7000;padding:20px;overflow-y:auto;">
+    <div style="background:white;border-radius:20px;padding:30px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="font-weight:800;color:var(--primario);">Editar Registro</h2>
+        <button onclick="cerrarEditar()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#64748b;">&times;</button>
+      </div>
+      <input type="hidden" id="edit_id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Comprador (Titular)</label><input id="edit_titular" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Fecha del Documento</label><input id="edit_fecha_doc" type="text" placeholder="dia/mes/año" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">DNI / RUC</label><input id="edit_dni" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Pasajero</label><input id="edit_pasajero" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Celular</label><input id="edit_celular" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Ruta</label><input id="edit_ruta" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Aerolínea</label><input id="edit_aerolinea" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Cód. Reserva</label><input id="edit_reserva" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Método de Pago</label><input id="edit_metodo" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">F. Salida</label><input id="edit_salida" type="date" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">F. Retorno</label><input id="edit_retorno" type="date" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">F. Nacimiento</label><input id="edit_nacimiento" type="date" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Comisión ($)</label><input id="edit_comision" type="number" step="0.01" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Neto ($)</label><input id="edit_neto" type="number" step="0.01" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Total Cobrado ($)</label><input id="edit_total" type="number" step="0.01" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Imp. Individual ($)</label><input id="edit_importe" type="number" step="0.01" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Counter</label><input id="edit_counter" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div style="grid-column:span 2;"><label style="font-size:11px;font-weight:700;color:#0369a1;text-transform:uppercase;">Observación</label><textarea id="edit_observacion" rows="2" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;resize:vertical;"></textarea></div>
+        <div style="grid-column:span 2; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; margin-top:8px;">
+          <label style="font-size:12px;font-weight:700;color:#166534;display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" id="edit_checkin_activo" style="width:18px;height:18px;cursor:pointer;">
+            ALERTA DE CHECK-IN ACTIVA (Desmarcar para ocultar de la lista de Alertas)
+          </label>
+        </div>
+      </div>
+      <div style="margin-top:20px;display:flex;gap:10px;">
+        <button onclick="guardarEdicion()" id="btnGuardarEdicion" style="flex:1;padding:14px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:10px;font-weight:800;font-size:15px;cursor:pointer;">💾 Guardar Cambios</button>
+        <button onclick="cerrarEditar()" style="padding:14px 24px;background:#f1f5f9;color:var(--primario);border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL TICKET -->
   <div id="modalTicket" class="modal-ticket">
@@ -622,7 +677,7 @@
       var { data, error } = await _supa
         .from('ventas')
         .select('*')
-        .order('correlativo', { ascending: false })
+        .order('correlativo', { ascending: true })
         .order('id', { ascending: true });
       if (error) throw error;
       var mapa = {};
@@ -651,10 +706,23 @@
       var ventas = Object.values(mapa);
       if (query) {
         var q = query.toUpperCase().trim();
-        ventas = ventas.filter(function(v) {
-          return [v.titular,v.doc,v.cel,v.ruta,v.staff,v.tipo,v.aerolinea,v.codigo_reserva,v.numeroDoc]
-            .join(' ').toUpperCase().indexOf(q) !== -1;
-        });
+        // Detectar búsqueda por mes: "enero", "febrero", etc o "03/2026"
+        var mesesES = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,octubre:10,noviembre:11,diciembre:12};
+        var mesFiltro = mesesES[q.toLowerCase()];
+        if (mesFiltro) {
+          ventas = ventas.filter(function(v) {
+            var f = _parseFecha(v.fecha);
+            return f && (f.getMonth()+1) === mesFiltro;
+          });
+        } else {
+          ventas = ventas.filter(function(v) {
+            var haystack = [v.titular,v.doc,v.cel,v.ruta,v.staff,v.tipo,v.aerolinea,v.codigo_reserva,v.numeroDoc]
+              .join(' ').toUpperCase();
+            // También buscar en nombres de pasajeros
+            var paxNames = (v.pasajeros||[]).map(function(p){return p.nom||'';}).join(' ').toUpperCase();
+            return haystack.indexOf(q) !== -1 || paxNames.indexOf(q) !== -1;
+          });
+        }
       }
       return ventas;
     }
@@ -774,7 +842,13 @@
         </div>
         <div class="campo">
           <label>PRECIO</label>
-          <input type="number" step="0.01" class="p_pre" oninput="calcularTotal()" required>
+          <div style="display:flex; border:2px solid var(--borde-notorio); border-radius:8px; overflow:hidden; background:#fff; align-items:center;">
+            <select class="p_moneda" style="padding:10px 8px; border:none; border-right:1px solid #e2e8f0; font-size:13px; font-weight:700; background:transparent; color:#1e293b; outline:none; cursor:pointer;">
+              <option value="USD" selected>USD $</option>
+              <option value="PEN">PEN S/</option>
+            </select>
+            <input type="number" step="0.01" class="p_pre" oninput="calcularTotal()" required style="flex:1; border:none; padding:10px; font-size:14px; outline:none; background:transparent;">
+          </div>
         </div>
         <button type="button" onclick="this.parentElement.remove(); calcularTotal()" style="background:none; border:none; color:red; cursor:pointer;">
           <i data-lucide="trash-2" size="18"></i>
@@ -982,6 +1056,13 @@
         '<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--texto-gris);">Cargando boletos...</td></tr>';
       try {
         db = await _fetchVentas();
+        // SORT BOLETOS: Newest to Oldest (Recientes a más antiguos)
+        db.sort(function(a, b) {
+          var d1 = _parseFecha(a.fecha) || new Date(0);
+          var d2 = _parseFecha(b.fecha) || new Date(0);
+          if (d1.getTime() === d2.getTime()) return (b.correlativo || 0) - (a.correlativo || 0); // Stable sort fallback
+          return d2 - d1;
+        });
         renderBoletos();
       } catch(err) {
         document.getElementById('lista-boletos').innerHTML =
@@ -1108,12 +1189,42 @@
         var hoy = new Date(); hoy.setHours(0,0,0,0);
         var alertas = [];
         db.filter(function(v){ return !v.anulado; }).forEach(function(v) {
+          var cel = v.cel || '';
+          
+          // SALIDA
           var fSal = _parseFecha(v.fechaSalida);
-          if (fSal) { fSal.setHours(0,0,0,0); var d = Math.floor((fSal-hoy)/86400000); if (d>=-1&&d<=2) alertas.push({ pasajero:v.titular, titular:v.titular, ruta:v.ruta, salida:v.fechaSalida, tipo:'SALIDA', cel:v.cel, diasFaltan:d, urgente:d<=2 }); }
+          if (fSal) { 
+            var f = new Date(fSal); f.setHours(0,0,0,0);
+            var ds = Math.floor((f-hoy)/86400000); 
+            if (ds >= -1 && ds <= 2) {
+              var paxs = (v.pasajeros||[]).map(function(p){return p.nom||'';}).join(', ');
+              alertas.push({ 
+                pasajero: paxs || v.titular, titular: v.titular, ruta: v.ruta, 
+                salida: v.fechaSalida, tipo: 'SALIDA', cel: cel, diasFaltan: ds, key: (v.titular||'')+'|SALIDA|'+(v.fechaSalida||'')
+              }); 
+            }
+          }
+          
+          // RETORNO
           var fRet = _parseFecha(v.fechaRetorno);
-          if (fRet && v.fechaRetorno && v.fechaRetorno !== '---') { fRet.setHours(0,0,0,0); var dr = Math.floor((fRet-hoy)/86400000); if (dr>=-1&&dr<=2) alertas.push({ pasajero:v.titular, titular:v.titular, ruta:v.ruta, salida:v.fechaRetorno, tipo:'RETORNO', cel:v.cel, diasFaltan:dr, urgente:dr<=2 }); }
+          if (fRet && v.fechaRetorno && v.fechaRetorno !== '---') { 
+            var f2 = new Date(fRet); f2.setHours(0,0,0,0);
+            var dr = Math.floor((f2-hoy)/86400000); 
+            if (dr >= -1 && dr <= 2) {
+              var paxs2 = (v.pasajeros||[]).map(function(p){return p.nom||'';}).join(', ');
+              alertas.push({ 
+                pasajero: paxs2 || v.titular, titular: v.titular, ruta: v.ruta, 
+                salida: v.fechaRetorno, tipo: 'RETORNO', cel: cel, diasFaltan: dr, key: (v.titular||'')+'|RETORNO|'+(v.fechaRetorno||'')
+              }); 
+            }
+          }
         });
+        // Ordenar: primero los más antiguos (negativos = verdes), luego los próximos
         alertas.sort(function(a,b){ return a.diasFaltan - b.diasFaltan; });
+        
+        // Guardar para la exportación global si es necesario
+        window._alertasExportables = alertas;
+        
         renderAlertas(alertas);
       } catch(err) {
         document.getElementById('lista-alertas').innerHTML =
@@ -1121,33 +1232,89 @@
       }
     }
 
-    function renderAlertas(alertas) {
-      document.getElementById('st-alert').innerText = alertas.length;
-      if (alertas.length === 0) {
+    // Alertas descartadas manualmente (verde)
+    var _alertasDescartadas = JSON.parse(localStorage.getItem('killa_alertas_desc') || '[]');
+    function descartarAlerta(key) {
+      if (!_alertasDescartadas.includes(key)) _alertasDescartadas.push(key);
+      localStorage.setItem('killa_alertas_desc', JSON.stringify(_alertasDescartadas));
+      cargarAlertas();
+    }
+
+    function renderAlertas(alertasTodas) {
+      // Separar las activas de las descartadas (estas últimas no se muestran)
+      var alertasActivas = alertasTodas.filter(function(a) {
+        return !_alertasDescartadas.includes(a.key);
+      });
+      document.getElementById('st-alert').innerText = alertasActivas.length;
+      if (alertasActivas.length === 0) {
         document.getElementById('lista-alertas').innerHTML =
           '<tr><td colspan="4" style="padding:40px;text-align:center;">No hay alertas de check-in</td></tr>';
         return;
       }
 
-      document.getElementById('lista-alertas').innerHTML = alertas.map(function(a) {
-        const colorFondo  = a.urgente ? '#fee2e2' : '#fff7ed';
-        const colorBadge  = a.urgente ? '#dc2626' : '#ea580c';
-        const diasFaltan  = parseInt(a.diasFaltan || 0);
-        const etiqueta    = diasFaltan === 0 ? 'HOY' : diasFaltan === 1 ? 'MAÑANA' : 'EN 2 DÍAS';
+      document.getElementById('lista-alertas').innerHTML = alertasActivas.map(function(a) {
+        // Restaurar colores originales: rojo claro para tarjeta, rojo oscuro para badge
+        const colorFondo = '#fee2e2'; // Rojo claro
+        const colorBadge = '#dc2626'; // Rojo oscuro
+        
+        const df = parseInt(a.diasFaltan || 0);
+        let etiqueta = df === 0 ? 'HOY' : df === 1 ? 'MAÑANA' : df === 2 ? 'EN 2 DÍAS' : 'AYER';
 
         return '<tr style="background:' + colorFondo + ';">' +
           '<td style="padding:15px;"><div style="font-weight:700;">' + (a.pasajero||a.titular||'') + '</div><div style="font-size:11px;">Titular: ' + (a.titular||'') + '</div></td>' +
           '<td style="padding:15px;">' + (a.ruta||'') + '</td>' +
           '<td style="padding:15px;">' +
             '<div style="display:inline-block;background:' + colorBadge + ';color:white;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">' + etiqueta + '</div>' +
-            '<div style="font-size:13px;font-weight:600;margin-top:4px;">' + (a.tipo||'') + '</div>' +
+            '<div style="font-size:13px;font-weight:600;margin-top:4px;color:' + colorBadge + ';">' + (a.tipo||'') + '</div>' +
             '<div style="font-size:12px;color:#64748b;">' + (a.salida||a.fecha||'') + '</div>' +
           '</td>' +
           '<td style="padding:15px;text-align:center;">' +
-            '<a href="https://wa.me/51' + (a.cel||'') + '?text=Hola%20' + encodeURIComponent(a.titular||'') + '" target="_blank" style="background:#10b981;color:white;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;font-size:12px;">WhatsApp</a>' +
+            '<div style="display:flex;flex-direction:column;gap:6px;align-items:center;">' +
+            '<a href="https://wa.me/51' + (a.cel||'') + '?text=Hola%20' + encodeURIComponent(a.titular||'') + '" target="_blank" style="background:#10b981;color:white;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;font-size:12px;">WhatsApp</a>' +
+            '<button onclick="descartarAlerta(\'' + (a.key).replace(/'/g,"\\'") + '\')" style="background:#22c55e;color:white;border:none;padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:700;font-size:11px;">✅ Marcar OK</button>' +
+            '</div>' +
           '</td>' +
           '</tr>';
       }).join('');
+    }
+
+    // ═══════════════════════════════════════════
+    //  DESCARGAR CHECK-IN
+    // ═══════════════════════════════════════════
+    function descargarCheckin() {
+      var alertasTodas = window._alertasExportables || [];
+      var alertasActivas = alertasTodas.filter(function(a) {
+        return !_alertasDescartadas.includes(a.key);
+      });
+      
+      if (alertasActivas.length === 0) {
+        alert('ℹ️ No hay alertas activas para descargar.');
+        return;
+      }
+      
+      var csv = 'PASAJEROS,TITULAR,RUTA,FECHA,TIPO,CELULAR,ESTADO\n';
+      alertasActivas.forEach(function(a) {
+        var estado = (a.diasFaltan < 0) ? 'REALIZADO' : 'PENDIENTE';
+        var fila = [
+          '"' + (a.pasajero||'').replace(/"/g, '""') + '"',
+          '"' + (a.titular||'').replace(/"/g, '""') + '"',
+          '"' + (a.ruta||'').replace(/"/g, '""') + '"',
+          '"' + (a.salida||'').replace(/"/g, '""') + '"',
+          '"' + (a.tipo||'').replace(/"/g, '""') + '"',
+          '"' + (a.cel||'').replace(/"/g, '""') + '"',
+          '"' + estado + '"'
+        ];
+        csv += fila.join(',') + '\n';
+      });
+      
+      var blob = new Blob(["\uFEFF"+csv], {type: "text/csv;charset=utf-8;"});
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "Checkin_Activos_" + new Date().getTime() + ".csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     // (renderAlertasLocal ya no se necesita — alerts se calculan directamente)
@@ -1163,11 +1330,19 @@
         db.forEach(function(v) { var key = v.titular+'||'+v.cel; if (!mapa[key]) mapa[key] = { titular: v.titular, doc: v.cel }; });
         var pasajeros = Object.values(mapa);
         if (pasajeros.length === 0) { grid.innerHTML = '<p style="color:var(--texto-gris);">No hay pasajeros registrados</p>'; return; }
+        
+        // Función inyectada en string para el onClick
+        window._clickPax = function(nombre) {
+          document.getElementById('buscMaestro').value = nombre;
+          abrirDatos(document.querySelector('[onclick="abrirDatos(this)"]'));
+          buscar();
+        };
+
         grid.innerHTML = pasajeros.map(function(p) {
           const inicial = p.titular ? p.titular[0] : 'P';
-          return '<div style="background:white;padding:20px;border-radius:16px;border:1px solid var(--borde);display:flex;align-items:center;gap:15px;">' +
+          return '<div onclick="_clickPax(\'' + (p.titular||'').replace(/'/g,"\\'") + '\')" style="background:white;padding:20px;border-radius:16px;border:1px solid var(--borde);display:flex;align-items:center;gap:15px;cursor:pointer;transition:transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform=\'scale(1.02)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.08)\'" onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'none\'">' +
             '<div style="width:50px;height:50px;background:var(--primario);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">' + inicial + '</div>' +
-            '<div><b>' + (p.titular||'') + '</b><br><small>TEL: ' + (p.doc||'') + '</small></div>' +
+            '<div><b style="color:var(--primario);">' + (p.titular||'') + '</b><br><small style="color:var(--texto-gris);">TEL: ' + (p.doc||'') + '</small></div>' +
             '</div>';
         }).join('');
       } catch(err) {
@@ -1180,14 +1355,61 @@
     // ═══════════════════════════════════════════
     async function buscar() {
       const q = document.getElementById('buscMaestro').value.trim();
-      if (!q) { cargarDashboard(); return; }
+      if (!q) {
+        // Sin query: recargar sección activa
+        var secActiva = '';
+        document.querySelectorAll('.seccion').forEach(function(s) { if (s.classList.contains('activa')) secActiva = s.id; });
+        if (secActiva === 'boletos') { cargarBoletos(); return; }
+        if (secActiva === 'datos')   { cargarDatos(); return; }
+        if (secActiva === 'pax')     { cargarPasajeros(); return; }
+        if (secActiva === 'check')   { cargarAlertas(); return; }
+        cargarDashboard(); return;
+      }
+      // Detectar sección activa
+      var seccionActiva = 'dash';
+      document.querySelectorAll('.seccion').forEach(function(s) { if (s.classList.contains('activa')) seccionActiva = s.id; });
+
       try {
+        var QU = q.toUpperCase().trim();
+
+        if (seccionActiva === 'datos') {
+          // Filtrar directamente en caché de datos (o recargar)
+          var rows = window._datosRowsCache || [];
+          if (!rows.length) { await cargarDatos(); rows = window._datosRowsCache || []; }
+          var filtrados = rows.filter(function(r) {
+            var hay = [r.titular,r.pasajero,r.dni_ruc,r.celular,r.ruta,r.aerolinea,r.codigo_reserva,r.numero_doc,r.counter,r.tipo_emision]
+              .join(' ').toUpperCase();
+            return hay.indexOf(QU) !== -1;
+          });
+          renderDatos(filtrados);
+          return;
+        }
+
+        if (seccionActiva === 'boletos') {
+          db = await _fetchVentas(q);
+          renderBoletos(db);
+          return;
+        }
+
+        if (seccionActiva === 'pax') {
+          db = await _fetchVentas(q);
+          cargarPasajeros();
+          return;
+        }
+
+        if (seccionActiva === 'check') {
+          db = await _fetchVentas(q);
+          cargarAlertas();
+          return;
+        }
+
+        // Por defecto: Balance
         db = await _fetchVentas(q);
         renderDashboard();
-        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('activo'));
-        const dashMenu = document.querySelector('[onclick="ir(\'dash\', this)"]');
+        document.querySelectorAll('.menu-item').forEach(function(m) { m.classList.remove('activo'); });
+        var dashMenu = document.querySelector('[onclick="ir(\'dash\', this)"]');
         if (dashMenu) dashMenu.classList.add('activo');
-        document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+        document.querySelectorAll('.seccion').forEach(function(s) { s.classList.remove('activa'); });
         document.getElementById('dash').classList.add('activa');
       } catch(err) {
         alert('❌ Error al buscar: ' + (err.message||''));
@@ -1410,7 +1632,7 @@
         var { data, error } = await _supa
           .from('ventas')
           .select('*')
-          .order('correlativo', { ascending: false })
+          .order('correlativo', { ascending: true })
           .order('id', { ascending: true });
         if (error) throw error;
         window._datosRowsCache = data || [];
@@ -1427,6 +1649,15 @@
           '<tr><td colspan="20" style="padding:40px;text-align:center;color:var(--texto-gris);">No hay registros</td></tr>';
         return;
       }
+
+      // Ordenar por fecha cronológicamente (más antiguo primero) para agrupar bien los meses (Antiguos a más recientes)
+      var sortedRows = rows.slice().sort(function(a, b) {
+        var d1 = _parseFecha(a.fecha) || new Date(0);
+        var d2 = _parseFecha(b.fecha) || new Date(0);
+        if (d1.getTime() === d2.getTime()) return (a.correlativo||0) - (b.correlativo||0); // Stable sort fallback
+        return d1 - d2;
+      });
+
       // Banner de bloqueo para montos admin
       var bannerDatos = document.getElementById('banner-datos-lock');
       if (bannerDatos) bannerDatos.style.display = _adminDesbloqueado ? 'none' : 'flex';
@@ -1435,16 +1666,27 @@
       var td = function(val, align) {
         return '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;text-align:' + (align||'left') + ';" title="' + String(val||'').replace(/<[^>]*>/g,'') + '">' + (val||'—') + '</td>';
       };
-      document.getElementById('lista-datos').innerHTML = rows.map(function(r) {
-        var hoy = new Date(); hoy.setHours(0,0,0,0);
-        // Helper inline para calcular color de fecha
-        var calcColor = function(rawDate) {
-          if (!rawDate || rawDate === '---' || String(rawDate).trim() === '') return '';
-          var s = String(rawDate).trim();
-          var f = null;
-          if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { f = new Date(s + 'T00:00:00'); }
-          else { var m2 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/); if (m2) f = new Date(+m2[3], +m2[2]-1, +m2[1]); }
-          if (!f || isNaN(f.getTime())) return '';
+      var tdFecha = function(val, color) {
+        return '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;white-space:nowrap;' + color + '">' + (val||'—') + '</td>';
+      };
+      // Agrupación por mes
+      var MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var ultimoMes = null;
+      var html = sortedRows.map(function(r) {
+        var fechaDoc = _parseFecha(r.fecha);
+        var mesActual = fechaDoc ? fechaDoc.getMonth() : -1;
+        var anioActual = fechaDoc ? fechaDoc.getFullYear() : 0;
+        var grupoMes = '';
+        if (ultimoMes === null || ultimoMes.mes !== mesActual || ultimoMes.anio !== anioActual) {
+          grupoMes = '<tr style="background:#f0f9ff;"><td colspan="20" style="padding:8px 10px;font-weight:bold;font-size:13px;color:#0369a1;border-bottom:1px solid var(--borde);">' + MESES_ES[mesActual] + ' ' + anioActual + '</td></tr>';
+          ultimoMes = { mes: mesActual, anio: anioActual };
+        }
+
+        var hoy = new Date();
+        var calcColor = function(dateStr) {
+          if (!dateStr || dateStr === '---' || String(dateStr).trim() === '') return '';
+          var f = _parseFecha(dateStr);
+          if (!f) return '';
           f.setHours(0,0,0,0);
           var diff = Math.floor((f - hoy) / 86400000);
           if (diff < 0)  return 'color:#10b981;font-weight:800;';
@@ -1466,11 +1708,11 @@
         var totVal = _adminDesbloqueado ? ('<b>$ ' + parseFloat(r.total||0).toFixed(2) + '</b>') : OCULTO;
         var colorSal = calcColor(r.fecha_salida);
         var colorRet = calcColor(r.fecha_retorno);
-        var tdFecha = function(val, color) {
-          return '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;white-space:nowrap;' + color + '">' + (val||'—') + '</td>';
-        };
-        return '<tr>' +
-          td('<b>' + (r.numero_doc||'') + '</b>') +
+        var diffDiasRegistro = fechaDoc ? Math.floor((new Date() - fechaDoc) / 86400000) : 999;
+        var badgeNuevo = (diffDiasRegistro >= 0 && diffDiasRegistro <= 7) ? '<span style="display:inline-block;margin-left:6px;background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:800;vertical-align:middle;">NUEVO</span>' : '';
+
+        return grupoMes + '<tr>' +
+          td('<b>' + (r.numero_doc||'') + '</b>' + badgeNuevo) +
           td(r.fecha||'') +
           td(r.titular||'') +
           td(r.pasajero||'') +
@@ -1490,8 +1732,136 @@
           td(netVal, 'right') +
           td(totVal, 'right') +
           td('$ ' + parseFloat(r.importe_individual||0).toFixed(2), 'right') +
+          '<td style="padding:8px;border-bottom:1px solid var(--borde);text-align:center;">' +
+          '<button onclick="abrirEditar(' + r.id + ')" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;">Editar</button>' +
+          '</td>' +
+          '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;min-width:120px;white-space:normal;word-break:break-word;">' +
+          '<span style="color:#0369a1;">' + (r.observacion || '<span style="color:#94a3b8;font-style:italic;">—</span>') + '</span>' +
+          '</td>' +
           '</tr>';
       }).join('');
+      document.getElementById('lista-datos').innerHTML = html;
+    }
+
+
+    // ═══════════════════════════════════════════
+    //  EDITAR REGISTRO → SUPABASE
+    // ═══════════════════════════════════════════
+    function abrirEditar(rowId) {
+      var pin = prompt('⚠️ Ingresa el PIN para editar:');
+      if (pin !== '1997') {
+        if (pin !== null) alert('❌ PIN Incorrecto');
+        return;
+      }
+
+      var rows = window._datosRowsCache || [];
+      var r = rows.find(function(x){ return x.id === rowId; });
+      if (!r) { alert('❌ Registro no encontrado en caché. Refresca la tabla primero.'); return; }
+
+      // Función para convertir fechas DD/MM/YYYY o cualquier formato a YYYY-MM-DD para el input type=date
+      function toInputDate(s) {
+        if (!s || s === '---') return '';
+        s = String(s).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s; // ya está en ISO
+        var m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (m) return m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
+        return '';
+      }
+
+      document.getElementById('edit_id').value         = r.id;
+      document.getElementById('edit_titular').value    = r.titular || '';
+      document.getElementById('edit_fecha_doc').value  = r.fecha || '';
+      document.getElementById('edit_dni').value        = r.dni_ruc || '';
+      document.getElementById('edit_pasajero').value   = r.pasajero || '';
+      document.getElementById('edit_celular').value    = r.celular || '';
+      document.getElementById('edit_ruta').value       = r.ruta || '';
+      document.getElementById('edit_aerolinea').value  = r.aerolinea || '';
+      document.getElementById('edit_reserva').value    = r.codigo_reserva || '';
+      document.getElementById('edit_metodo').value     = r.metodo_pago || '';
+      document.getElementById('edit_salida').value     = toInputDate(r.fecha_salida);
+      document.getElementById('edit_retorno').value    = toInputDate(r.fecha_retorno);
+      document.getElementById('edit_nacimiento').value = toInputDate(r.fecha_nacimiento);
+      document.getElementById('edit_comision').value   = r.comision || '';
+      document.getElementById('edit_neto').value       = r.neto || '';
+      document.getElementById('edit_total').value      = r.total || '';
+      document.getElementById('edit_importe').value    = r.importe_individual || '';
+      document.getElementById('edit_counter').value    = r.counter || '';
+      document.getElementById('edit_observacion').value = r.observacion || '';
+
+      document.getElementById('modalEditar').style.display = 'flex';
+    }
+
+    function cerrarEditar() {
+      document.getElementById('modalEditar').style.display = 'none';
+    }
+
+    async function guardarEdicion() {
+      var btn = document.getElementById('btnGuardarEdicion');
+      var rowId = parseInt(document.getElementById('edit_id').value);
+      if (!rowId) { alert('❌ Error: ID de registro no encontrado.'); return; }
+
+      btn.innerHTML = '⏳ Guardando...';
+      btn.disabled = true;
+
+      var updates = {
+        titular:          document.getElementById('edit_titular').value.toUpperCase(),
+        dni_ruc:          document.getElementById('edit_dni').value,
+        pasajero:         document.getElementById('edit_pasajero').value.toUpperCase(),
+        celular:          document.getElementById('edit_celular').value,
+        ruta:             document.getElementById('edit_ruta').value.toUpperCase(),
+        aerolinea:        document.getElementById('edit_aerolinea').value.toUpperCase(),
+        codigo_reserva:   document.getElementById('edit_reserva').value.toUpperCase(),
+        metodo_pago:      document.getElementById('edit_metodo').value,
+        fecha_salida:     document.getElementById('edit_salida').value || null,
+        fecha_retorno:    document.getElementById('edit_retorno').value || null,
+        fecha_nacimiento: document.getElementById('edit_nacimiento').value || null,
+        comision:         parseFloat(document.getElementById('edit_comision').value) || 0,
+        neto:             parseFloat(document.getElementById('edit_neto').value) || 0,
+        total:            parseFloat(document.getElementById('edit_total').value) || 0,
+        importe_individual: parseFloat(document.getElementById('edit_importe').value) || 0,
+        counter:          document.getElementById('edit_counter').value,
+        fecha:            document.getElementById('edit_fecha_doc').value || undefined,
+        observacion:      document.getElementById('edit_observacion').value || ''
+      };
+
+      try {
+        var { error } = await _supa.from('ventas').update(updates).eq('id', rowId);
+        if (error) throw error;
+
+        // Actualizar caché local
+        var rows = window._datosRowsCache || [];
+        var idx = rows.findIndex(function(x){ return x.id === rowId; });
+        if (idx !== -1) Object.assign(rows[idx], updates);
+
+        // Actualizar checkin toggle
+        var checkinActivo = document.getElementById('edit_checkin_activo').checked;
+        var fS = updates.fecha_salida || '';
+        var fR = updates.fecha_retorno || '';
+        var kS = (updates.titular||'') + '|SALIDA|' + fS;
+        var kR = (updates.titular||'') + '|RETORNO|' + fR;
+        var descList = JSON.parse(localStorage.getItem('killa_alertas_desc') || '[]');
+
+        if (checkinActivo) {
+          // Activar = QUITAR de descartados
+          descList = descList.filter(function(k) { return k !== kS && k !== kR; });
+        } else {
+          // Desactivar = AGREGAR a descartados
+          if (fS && !descList.includes(kS)) descList.push(kS);
+          if (fR && fR !== '---' && !descList.includes(kR)) descList.push(kR);
+        }
+        localStorage.setItem('killa_alertas_desc', JSON.stringify(descList));
+        window._alertasDescartadas = descList; // Actualizar variable global en JS
+
+        cerrarEditar();
+        alert('✅ Registro actualizado correctamente');
+        cargarAlertas(); // Recarga sección check-in
+        cargarDatos();   // Refresca la tabla desde la DB
+      } catch(err) {
+        alert('❌ Error al guardar: ' + (err.message || String(err)));
+      } finally {
+        btn.innerHTML = '💾 Guardar Cambios';
+        btn.disabled = false;
+      }
     }
 
     function exportarCSV() {
@@ -1568,8 +1938,34 @@
     // ═══════════════════════════════════════════
     async function importarDesdeSheet() {
       var text = document.getElementById('import-textarea').value.trim();
-      if (!text) { alert('⚠️ Pega primero los datos del Google Sheet'); return; }
-      var filas = parseTSV(text);
+      if (!text) { alert('⚠️ Pega primero los datos'); return; }
+      var filas = [];
+      if (text.includes(' | ')) {
+        text.split('\n').forEach(function(line) {
+          if (!line.trim()) return;
+          var p = line.split('|').map(function(x) { return x.trim(); });
+          if (p.length >= 7) {
+            var arr = new Array(20).fill('');
+            arr[1] = p[1];
+            arr[2] = p[0];
+            arr[4] = p[0];
+            arr[7] = p[2];
+            var fdates = p[3] ? p[3].split('-') : [];
+            arr[8] = fdates[0] ? fdates[0].trim() : '';
+            arr[9] = fdates[1] ? fdates[1].trim() : '';
+            arr[10] = p[4] ? p[4].replace('📞', '').trim() : '';
+            arr[13] = p[5];
+            arr[14] = p[6];
+            var totStr = p[7] ? p[7].replace(/S\/\s*/, '').trim() : '0';
+            arr[15] = '0';
+            arr[16] = '0';
+            arr[17] = totStr;
+            filas.push(arr);
+          }
+        });
+      } else {
+        filas = parseTSV(text);
+      }
       if (filas.length === 0) { alert('⚠️ No se encontraron filas'); return; }
 
       var msgEl = document.getElementById('import-progress');
@@ -1735,6 +2131,21 @@
       window.addEventListener('load', function() { setTimeout(initBoletosDualScroll, 700); });
       document.addEventListener('click', function(e) { var el = e.target && e.target.closest ? e.target.closest('[onclick]') : null; if (el && el.getAttribute('onclick') && el.getAttribute('onclick').indexOf('boletos') !== -1) setTimeout(initBoletosDualScroll, 800); });
     })();
+    // Filtrar por mes en la tabla Base de Datos
+    function filtrarPorMes() {
+      var mes = parseInt(document.getElementById('filtro-mes').value) || 0;
+      var rows = window._datosRowsCache || [];
+      if (!mes) { renderDatos(rows); return; }
+      var filtrados = rows.filter(function(r) {
+        var f = r.fecha ? String(r.fecha).trim() : '';
+        var mp = f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (mp) return parseInt(mp[2], 10) === mes;
+        var mi = f.match(/^(\d{4})-(\d{2})-\d{2}$/);
+        if (mi) return parseInt(mi[2], 10) === mes;
+        return false;
+      });
+      renderDatos(filtrados);
+    }
   </script>
 </body>
 </html>
