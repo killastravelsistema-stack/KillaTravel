@@ -16,7 +16,7 @@
     :root {
       --primario: #1e293b; 
       --acento: #0ea5e9;
-      --fondo: #e0f2fe;
+      --fondo: #f0f9ff;
       --blanco: #ffffff;
       --borde: #e2e8f0;
       --borde-notorio: #94a3b8;
@@ -1656,6 +1656,14 @@
           '<tr><td colspan="20" style="padding:40px;text-align:center;color:var(--texto-gris);">No hay registros</td></tr>';
         return;
       }
+
+      // Ordenar por fecha cronológicamente (más reciente primero) para agrupar bien los meses
+      var sortedRows = rows.slice().sort(function(a, b) {
+        var d1 = _parseFecha(a.fecha) || new Date(0);
+        var d2 = _parseFecha(b.fecha) || new Date(0);
+        return d2 - d1;
+      });
+
       // Banner de bloqueo para montos admin
       var bannerDatos = document.getElementById('banner-datos-lock');
       if (bannerDatos) bannerDatos.style.display = _adminDesbloqueado ? 'none' : 'flex';
@@ -1670,7 +1678,7 @@
       // Agrupación por mes
       var MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
       var ultimoMes = null;
-      var html = rows.map(function(r) {
+      var html = sortedRows.map(function(r) {
         var fechaDoc = _parseFecha(r.fecha);
         var mesActual = fechaDoc ? fechaDoc.getMonth() : -1;
         var anioActual = fechaDoc ? fechaDoc.getFullYear() : 0;
