@@ -1,0 +1,2236 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>KillaTravel Pro v3.0 | Guissel Luna</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    :root {
+      --primario: #1e293b; 
+      --acento: #0ea5e9;
+      --fondo: #f0f9ff;
+      --blanco: #ffffff;
+      --borde: #e2e8f0;
+      --borde-notorio: #94a3b8;
+      --texto-gris: #64748b;
+      --exito: #10b981;
+      --peligro: #ef4444;
+    }
+
+    * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
+    body { background-color: var(--fondo); display: flex; height: 100vh; color: var(--primario); overflow-y: auto; }
+
+    .sidebar { width: 280px; background: white; border-right: 1px solid var(--borde); display: flex; flex-direction: column; padding: 25px; flex-shrink: 0; z-index: 100; }
+    .brand-box { padding: 10px; margin-bottom: 25px; text-align: center; border-bottom: 2px solid var(--fondo); }
+    .logo-img { width: 100%; max-width: 160px; height: auto; }
+    .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    .menu-item { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      padding: 12px 15px; 
+      color: var(--texto-gris); 
+      text-decoration: none; 
+      border-radius: 10px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      transition: all 0.2s ease;
+    }
+    .menu-item.activo { 
+      background: var(--primario); 
+      color: white;
+      box-shadow: 0 4px 12px rgba(30, 41, 59, 0.15);
+    }
+    .menu-item:hover:not(.activo) { 
+      background: #f8fafc;
+      transform: translateX(3px);
+    }
+    .sidebar-footer { padding-top: 15px; border-top: 1px solid var(--borde); font-size: 11px; color: var(--texto-gris); }
+
+    .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+    header { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid var(--borde); position: sticky; top: 0; z-index: 90; }
+
+    .seccion { display: none; padding: 15px 30px; }
+    .seccion.activa { 
+      display: block; 
+      animation: fadeIn 0.4s ease;
+      border-left: 3px solid var(--acento);
+      padding-left: 27px;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .stat-card { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 16px; 
+      border: 1px solid var(--borde); 
+      position: relative;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+    .stat-card h2 { margin: 8px 0 0; font-size: 22px; }
+    .blur { filter: blur(8px); user-select: none; }
+    .unlock-btn { position: absolute; inset: 0; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 16px; font-weight: 700; color: var(--primario); font-size: 11px; z-index: 10; }
+
+    .card { 
+      background: white; 
+      padding: 25px; 
+      border-radius: 20px; 
+      border: 1px solid var(--borde); 
+      max-width: 1100px; 
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .campo { display: flex; flex-direction: column; gap: 4px; }
+    .campo label { font-size: 10px; font-weight: 800; color: var(--texto-gris); text-transform: uppercase; }
+    
+    .campo input, .campo select, .campo textarea { 
+      padding: 10px; 
+      border: 2px solid var(--borde-notorio); 
+      border-radius: 8px; 
+      font-size: 14px; 
+      outline: none; 
+      background: #ffffff; 
+      transition: border-color 0.2s;
+      color: #1e293b;
+    }
+    .campo input:focus, .campo select:focus, .campo textarea:focus {
+      border-color: var(--acento);
+    }
+
+    .pax-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 40px; gap: 10px; padding: 12px; background: #f8fafc; border-radius: 10px; margin-bottom: 8px; align-items: end; border: 1px solid #eee; }
+    .btn-add-pax { background: var(--acento); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .btn-save { background: var(--primario); color: white; padding: 18px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 16px; width: 100%; }
+    
+    .btn-anular { background: var(--peligro); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; }
+    .btn-anular:hover { background: #dc2626; }
+
+    .modal-ticket { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; place-items: start center; z-index: 5000; overflow-y: auto; padding: 20px 0; }
+    .ticket-papel { 
+      width: 76mm; 
+      background: white; 
+      padding: 4mm 3mm 2mm 3mm; 
+      color: #000 !important; 
+      font-family: Arial, sans-serif; 
+      line-height: 1.05; 
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .t-header { text-align: center; font-size: 7pt; line-height: 1.1; margin: 0; padding: 0; }
+    .t-header b { font-size: 8.5pt; }
+    .t-header img { margin: 0 0 2px 0; padding: 0; display: block; }
+    .t-dots { border-top: 1.5pt dotted #000; margin: 4px 0; }
+    .t-title { text-align: center; font-weight: bold; font-size: 10.5pt; margin: 3px 0; line-height: 1.1; }
+    .t-subtitle { text-align: center; font-weight: bold; font-size: 8.5pt; margin: 3px 0 5px 0; text-transform: uppercase; }
+    .t-row { display: flex; font-size: 8pt; margin-bottom: 1px; }
+    .t-label { width: 90px; font-weight: bold; }
+    .t-valor { color: #000 !important; }
+    
+    .t-tabla { width: 100%; border-collapse: collapse; margin: 5px 0 4px 0; font-size: 7.5pt; border: none; }
+    .t-tabla th { text-align: left; border: none; border-bottom: 1pt solid #000; padding: 2px 3px; font-weight: bold; }
+    .t-tabla td { padding: 2px 3px; border: none; vertical-align: top; color: #000 !important; }
+    .t-tabla tr:not(:last-child) td { border-bottom: 1pt dotted #ddd; }
+    
+    .t-total-box { text-align: right; font-weight: bold; font-size: 10.5pt; margin: 4px 0; color: #000 !important; }
+    
+    .t-conditions { 
+      font-size: 5.5pt;
+      text-align: justify; 
+      margin: 5px 0 0 0; 
+      line-height: 1.05;
+      border-top: 1pt solid #000; 
+      padding: 4px 0 0 0; 
+      color: #000 !important;
+      font-weight: 600;
+    }
+    .qr-container { text-align: center; margin: 4px 0 1mm 0; padding: 0; }
+    .qr-img { width: 50px; height: 50px; object-fit: contain; margin: 0; padding: 0; display: inline-block; }
+
+    .modal-pin { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; place-items: center; z-index: 6000; }
+    .pin-card { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 320px; }
+
+    @media (max-width: 800px) {
+      body { flex-direction: column; overflow-y: auto; overflow-x: hidden; height: auto; min-height: 100vh; }
+      .sidebar { width: 100%; height: auto; border-bottom: none; border-top: 2px solid var(--borde); border-right: none; padding: 6px 8px; position: fixed; bottom: 0; left: 0; top: auto; z-index: 100; background: white; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+      .brand-box { display: none; }
+      .sidebar-footer { display: none; }
+      .nav-menu { flex-direction: row; justify-content: space-around; gap: 0; }
+      .menu-item { flex-direction: column; font-size: 9px; padding: 6px 3px; gap: 3px; text-align: center; min-width: 0; }
+      .menu-item span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52px; }
+      .menu-item i { width: 18px; height: 18px; }
+      header { flex-direction: column; padding: 10px 12px; gap: 8px; align-items: stretch; }
+      header > div:first-child { font-size: 12px; text-align: center; }
+      header > div:last-child { flex-direction: column; gap: 8px; width: 100% !important; }
+      .search-box, header input { width: 100% !important; }
+      .main { margin-left: 0; padding: 0; padding-bottom: 72px; overflow-y: auto; }
+      .seccion { padding: 12px; }
+      .seccion.activa { padding-left: 12px; border-left: none; border-top: 3px solid var(--acento); }
+      .form-grid { grid-template-columns: 1fr !important; gap: 10px; }
+      .campo { grid-column: span 1 !important; }
+      .pax-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .pax-row > *:last-child { grid-column: span 2; }
+      .grid-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .stat-card { padding: 12px; }
+      .stat-card h2 { font-size: 16px; }
+      .card { padding: 12px; border-radius: 12px; max-width: 100%; }
+      .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+      table { font-size: 11px; }
+      table th, table td { padding: 8px 6px !important; font-size: 11px !important; }
+      .btn-save, .btn-primary { font-size: 14px; padding: 14px; }
+      .btn-add-pax { font-size: 12px; padding: 10px 14px; }
+      .btn-anular { font-size: 10px; padding: 5px 8px; }
+      .ticket-papel { width: 94vw; max-width: 76mm; }
+      .pin-card { width: 90%; max-width: 320px; }
+      /* Datos section on mobile */
+      #datos .seccion-datos-header { flex-direction: column !important; align-items: stretch !important; }
+      #datos-btn-group { flex-wrap: wrap; gap: 6px !important; }
+      #datos-btn-group button { flex: 1; min-width: 100px; font-size: 11px !important; padding: 8px 10px !important; }
+      .top-scroll-bar { display: block !important; }
+    }
+
+    @media print {
+      @page { size: 80mm auto; margin: 0; }
+      body * { visibility: hidden; }
+      #area-print, #area-print * { visibility: visible; }
+      #area-print { position: absolute; left: 0; top: 0; width: 76mm; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+      .ticket-papel { padding: 4mm 3mm 2mm 3mm !important; margin: 0 !important; page-break-after: always; }
+      .t-header img { margin: 0 0 2px 0 !important; padding: 0 !important; }
+      .t-dots { margin: 4px 0 !important; }
+      .t-title { margin: 3px 0 !important; }
+      .t-subtitle { margin: 3px 0 5px 0 !important; }
+      .t-tabla { margin: 5px 0 4px 0 !important; }
+      .t-tabla td { color: #000 !important; }
+      .t-total-box { margin: 4px 0 !important; color: #000 !important; }
+      .t-conditions { font-weight: 700; font-size: 5.5pt; margin: 5px 0 0 0 !important; padding: 4px 0 0 0 !important; line-height: 1.05 !important; }
+      .qr-container { margin: 4px 0 1mm 0 !important; padding: 0 !important; }
+      .qr-img { margin: 0 !important; padding: 0 !important; width: 50px !important; height: 50px !important; }
+      .t-tabla, .t-tabla th, .t-tabla td { border: none !important; }
+      .t-tabla th { border-bottom: 1pt solid #000 !important; padding: 2px 3px !important; }
+      .t-tabla td { padding: 2px 3px !important; }
+      .t-tabla tr:not(:last-child) td { border-bottom: 1pt dotted #ccc !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="modalPin" class="modal-pin">
+    <div class="pin-card">
+      <i data-lucide="lock" size="30" style="margin-bottom: 10px; color: var(--primario);"></i>
+      <h3>PIN de Seguridad</h3>
+      <input type="password" id="pinInput" maxlength="4" style="width:100%; font-size:32px; text-align:center; padding:10px; margin:20px 0; border:2px solid #ddd; border-radius:12px;" placeholder="****" onkeypress="if(event.key==='Enter') validarPin()">
+      <button onclick="validarPin()" style="width:100%; padding:15px; background:var(--primario); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer;">DESBLOQUEAR</button>
+      <button onclick="document.getElementById('modalPin').style.display='none'" style="margin-top:10px; background:none; border:none; color:red; cursor:pointer;">Cancelar</button>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="brand-box" style="background: #e0f2fe; border-radius: 12px; margin-bottom: 25px;">
+      <img src="https://i.ibb.co/SScGQck/logo-killa.png" class="logo-img" alt="Logo Killa" onerror="this.src='https://via.placeholder.com/180x100?text=KILLA+TRAVEL'">
+    </div>
+    <nav class="nav-menu">
+      <div class="menu-item activo" onclick="ir('dash', this)"><i data-lucide="bar-chart-3"></i><span>Balance</span></div>
+      <div class="menu-item" onclick="ir('emi', this)"><i data-lucide="ticket"></i><span>Emitir</span></div>
+      <div class="menu-item" onclick="ir('boletos', this)"><i data-lucide="file-text"></i><span>Boletos</span></div>
+      <div class="menu-item" onclick="ir('check', this)"><i data-lucide="bell-ring"></i><span>Alertas</span></div>
+      <div class="menu-item" onclick="ir('pax', this)"><i data-lucide="users"></i><span>Pasajeros</span></div>
+      <div class="menu-item" onclick="abrirDatos(this)"><i data-lucide="database"></i><span>Base de Datos</span></div>
+    </nav>
+    <div class="sidebar-footer"><b>Admin:</b> Guissel Carla Luna Quispe</div>
+  </aside>
+
+  <main class="main">
+    <header>
+      <div style="font-weight:700; font-size:14px">Software v3.0 | <span style="color:var(--acento)">KillaTravel Control</span></div>
+      <div style="display:flex; align-items:center; gap:20px;">
+        <div style="background:#f8fafc; padding:8px 20px; border-radius:8px; border:1px solid var(--borde); font-size:13px; color:var(--texto-gris); font-weight:600;">
+          <span id="fechaHoy"></span>
+        </div>
+        <div style="background:#f1f5f9; padding:8px 25px; border-radius:30px; width:350px; display:flex; align-items:center; border:1px solid var(--borde)">
+          <i data-lucide="search" size="18" color="#94a3b8"></i>
+          <input type="text" id="buscMaestro" placeholder="Buscar PAX o DNI... (Enter)" onkeypress="if(event.key==='Enter') buscar()" style="border:none; background:none; outline:none; padding:5px; width:100%; font-size:14px;">
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; font-size:12px;">
+          <span id="sync-status" style="color:#94a3b8;">&#9679; Conectando...</span>
+          <button onclick="sincronizarAhora()" title="Recargar datos de la nube" style="background:var(--acento); color:white; border:none; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:11px; font-weight:700;">&#8635; Sync</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECCIÓN BALANCE -->
+    <section id="dash" class="seccion activa">
+      <h1 style="margin-bottom: 8px; font-weight: 700; color: var(--primario);">Panel de Balance</h1>
+      <p style="color:var(--texto-gris); font-size:13px; margin-bottom:20px;">Vista general de documentos y totales</p>
+      
+      <div class="grid-stats">
+        <div class="stat-card"><span>Boletos</span><h2 id="st-t">0</h2></div>
+        <div class="stat-card">
+          <div id="l1" class="unlock-btn" onclick="abrirPin()">VER TOTAL</div>
+          <span>Total Cobrado</span><h2 id="st-c" class="blur">$ 0.00</h2>
+        </div>
+        <div class="stat-card">
+          <div id="l2" class="unlock-btn" onclick="abrirPin()">VER UTILIDAD</div>
+          <span>Utilidad (Ganancia)</span><h2 id="st-u" class="blur">$ 0.00</h2>
+        </div>
+        <div class="stat-card"><span>Alertas 48h</span><h2 id="st-alert">0</h2></div>
+      </div>
+      <div class="table-container" style="background: white; border-radius: 16px; border: 1px solid var(--borde); overflow: hidden; border-top: 3px solid var(--acento);">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="background: var(--fondo); padding: 15px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">FECHA</th>
+              <th style="background: var(--fondo); padding: 15px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">OFICINA</th>
+              <th style="background: var(--fondo); padding: 15px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">COMPRADOR</th>
+              <th style="background: var(--fondo); padding: 15px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">TOTAL</th>
+              <th style="background: var(--fondo); padding: 15px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">ESTADO</th>
+              <th style="background: var(--fondo); padding: 15px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">ACCIÓN</th>
+            </tr>
+          </thead>
+          <tbody id="lista-global">
+            <tr><td colspan="6" style="padding:40px; text-align:center; color:var(--texto-gris);">Cargando datos...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECCIÓN EMITIR -->
+    <section id="emi" class="seccion">
+      <h1 style="margin-bottom: 8px; font-weight: 700; color: var(--primario);">Nueva Cobranza</h1>
+      <p style="color:var(--texto-gris); font-size:13px; margin-bottom:20px;">Registra un nuevo documento de venta</p>
+      <div class="card">
+        <form id="formVenta" onsubmit="registrarVenta(event)">
+          <div class="form-grid" style="margin-bottom:20px;">
+            <div class="campo" style="grid-column: span 2;">
+              <label>Señor(a) (Titular)</label>
+              <input type="text" id="i_titular" required>
+            </div>
+            <div class="campo">
+              <label>DNI / RUC</label>
+              <input type="text" id="i_doc" maxlength="11" required>
+            </div>
+            <div class="campo">
+              <label>Celular</label>
+              <input type="text" id="i_cel" maxlength="9" required>
+            </div>
+            <div class="campo" style="grid-column: span 2;">
+              <label>Oficina / Dirección</label>
+              <select id="i_ofi">
+                <option value="">Seleccionar...</option>
+                <option value="001">Av. Fernando Wiesse Nro. 5186 Urb. Mariscal Cáceres Lima - S.J.L</option>
+                <option value="002">Av. Proceres de la independencia Nro. 3301 Asoc. Los Pinos Mz. C-1 Lt.27 - S.J.L</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Ruta General</label>
+              <input type="text" id="i_ruta" required>
+            </div>
+            <div class="campo">
+              <label>Aerolínea</label>
+              <input type="text" id="i_aerolinea" placeholder="Ej: LATAM, Avianca...">
+            </div>
+            <div class="campo">
+              <label>Código de Reserva</label>
+              <input type="text" id="i_codigo_reserva" placeholder="Ej: ABC123">
+            </div>
+          </div>
+          
+          <div id="pax-container"></div>
+          
+          <button type="button" class="btn-add-pax" onclick="agregarFilaPax()">
+            <i data-lucide="plus"></i> Añadir Pasajero
+          </button>
+          
+          <div class="form-grid" style="border-top:1px solid #eee; padding-top:20px;">
+            <div class="campo">
+              <label>Servicio</label>
+              <select id="i_tipo">
+                <option value="">Seleccionar...</option>
+                <option value="BOLETOS AÉREOS">Aéreo</option>
+                <option value="REMISIÓN">Remisión </option>
+                <option value="PAQUETES TURÍSTICOS">Paquete</option>
+                <option value="SEGUROS DE VIAJE">Seguro</option>
+                <option value="RESERVAS DE HOTEL">Hotel</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Counter</label>
+              <select id="i_staff">
+                <option value="">Seleccionar...</option>
+                <option>Andrea Paredes</option>
+                <option>Guissel Luna</option>
+                <option>Jonatan Rodríguez</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Pago</label>
+              <select id="i_meto">
+                <option value="">Seleccionar...</option>
+                <option>Efectivo</option>
+                <option>Yape/Plin</option>
+                <option>Link de pago</option>
+                <option>Tarjeta de Crédito</option>
+                <option>Depósito/Transf.</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Cobrado $</label>
+              <input type="number" id="i_total" readonly style="background:#f1f5f9;">
+            </div>
+            <div class="campo">
+              <label>Comisión $</label>
+              <input type="number" id="i_comision" step="0.01" value="0.00" oninput="calcularTotal()">
+            </div>
+            <div class="campo">
+              <label>Monto Neto $</label>
+              <input type="number" id="i_neto" readonly style="background:#f1f5f9;">
+            </div>
+          </div>
+          
+          <button type="submit" class="btn-save" id="btnGuardar">
+            <i data-lucide="printer"></i> GENERAR E IMPRIMIR
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- SECCIÓN BOLETOS -->
+    <section id="boletos" class="seccion">
+      <h1 style="margin-bottom: 8px; font-weight: 700; color: var(--primario);">Historial de Boletos</h1>
+      <p style="color:var(--texto-gris); font-size:13px; margin-bottom:20px;">Consulta, reimprime o anula documentos anteriores</p>
+      <div class="table-container" style="background: white; border-radius: 16px; border: 1px solid var(--borde); overflow:hidden; border-top: 3px solid var(--acento);">
+        <!-- BARRA DE SCROLL SUPERIOR (espejo) -->
+        <div id="boletos-scroll-top" style="overflow-x:auto;overflow-y:hidden;border-bottom:1px solid var(--borde);background:#f8fafc;">
+          <div id="boletos-scroll-top-inner" style="height:10px;"></div>
+        </div>
+        <div id="boletos-scroll-main" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+          <table id="boletos-tabla" style="width: 100%; min-width: 1200px; border-collapse: collapse; table-layout: fixed;">
+            <thead>
+              <tr style="background: #e0f2fe;">
+                <th style="width: 80px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">FECHA</th>
+                <th style="width: 120px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">N° DOC</th>
+                <th style="width: 170px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">COMPRADOR</th>
+                <th style="width: 110px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">RUTA</th>
+                <th style="width: 200px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">PAX</th>
+                <th style="width: 80px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">TOTAL</th>
+                <th style="width: 110px; padding: 12px 10px; text-align: left; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">COUNTER</th>
+                <th style="width: 170px; padding: 12px 10px; text-align: center; font-weight: 800; font-size: 11px; color: #0369a1; text-transform: uppercase;">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody id="lista-boletos">
+              <tr><td colspan="8" style="padding:40px; text-align:center; color:var(--texto-gris);">Cargando boletos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN CHECK-IN -->
+    <section id="check" class="seccion">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+        <div>
+          <h1 style="font-weight:700;color:var(--primario);">Control de Check-in</h1>
+          <p style="color:var(--texto-gris);font-size:13px;">Alertas de vuelos próximos (0-2 días) — Salida y Retorno</p>
+        </div>
+        <button onclick="descargarCheckin()" style="background:#0284c7;color:white;border:none;padding:11px 20px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;"><i data-lucide="download" size="16"></i> Descargar Check-in</button>
+      </div>
+      <div style="background:#e0f2fe; border-left:4px solid #0ea5e9; padding:12px 20px; border-radius:8px; margin-bottom:20px; font-size:13px; color:#075985;">
+        <b>Nota:</b> Se generan alertas separadas para fechas de salida y retorno cuando faltan 2 días o menos.
+      </div>
+      <div class="table-container" style="background: white; border-radius: 16px; border: 1px solid var(--borde); overflow: hidden; border-top: 3px solid var(--acento);">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="background: var(--fondo); padding: 15px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">PASAJERO</th>
+              <th style="background: var(--fondo); padding: 15px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">RUTA</th>
+              <th style="background: var(--fondo); padding: 15px; text-align: left; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">FECHA / TIPO</th>
+              <th style="background: var(--fondo); padding: 15px; text-align: center; font-weight: 700; font-size: 11px; color: var(--texto-gris); text-transform: uppercase;">ACCIÓN</th>
+            </tr>
+          </thead>
+          <tbody id="lista-alertas">
+            <tr><td colspan="4" style="padding:40px; text-align:center; color:var(--texto-gris);">Cargando alertas...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECCIÓN PASAJEROS -->
+    <section id="pax" class="seccion">
+      <h1 style="margin-bottom: 8px; font-weight: 700; color: var(--primario);">Base de Pasajeros</h1>
+      <p style="color:var(--texto-gris); font-size:13px; margin-bottom:20px;">Clientes únicos registrados en el sistema</p>
+      <div id="pax-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:15px;"></div>
+    </section>
+
+    <!-- SECCIÓN DATOS COMPLETOS -->
+    <section id="datos" class="seccion">
+      <div class="seccion-datos-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:15px; margin-bottom:10px;">
+        <div>
+          <h1 style="margin-bottom: 4px; font-weight: 700; color: var(--primario);">Base de Datos</h1>
+          <p style="color:var(--texto-gris); font-size:13px;">Todos los campos de cada pasajero registrado</p>
+        </div>
+        <div id="datos-btn-group" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <input type="date" id="filtro-fecha" onchange="filtrarPorMes(event)" style="padding:8px 12px;border:2px solid var(--borde-notorio);border-radius:8px;font-size:13px;font-weight:600;background:#fff;color:#1e293b;outline:none;" title="Filtrar por fecha exacta">
+          <select id="filtro-mes" onchange="filtrarPorMes(event)" style="padding:10px 14px;border:2px solid var(--borde-notorio);border-radius:8px;font-size:13px;font-weight:600;background:#fff;color:#1e293b;outline:none;">
+            <option value="" selected>— Todos los meses —</option>
+            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+            <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+            <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+            <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+          <button onclick="cargarDatos()" style="background:var(--acento);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;"><i data-lucide="refresh-cw" size="16"></i> Actualizar</button>
+          <button onclick="abrirImportar()" style="background:#7c3aed;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;"><i data-lucide="upload" size="16"></i> Importar GS</button>
+          <button onclick="exportarCSV()" style="background:var(--exito);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;"><i data-lucide="download" size="16"></i> CSV</button>
+        </div>
+      </div>
+      <!-- Banner bloqueo montos financieros -->
+      <div id="banner-datos-lock" style="display:flex;align-items:center;gap:14px;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:12px;padding:14px 20px;margin-bottom:16px;flex-wrap:wrap;">
+        <span style="font-size:22px;">🔒</span>
+        <div style="flex:1;">
+          <b style="color:#92400e;">Montos financieros ocultos</b><br>
+          <span style="font-size:12px;color:#78350f;">Las columnas COMISIÓN, NETO y COBRADO solo las puede ver la admin. Ingresa el PIN para revelarlas.</span>
+        </div>
+        <button onclick="abrirPin()" style="background:#f59e0b;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;">Ver montos (PIN)</button>
+      </div>
+      <div id="banner-datos-unlock" style="display:none;align-items:center;gap:14px;background:#d1fae5;border:1.5px solid #10b981;border-radius:12px;padding:14px 20px;margin-bottom:16px;flex-wrap:wrap;">
+        <span style="font-size:22px;">🔓</span>
+        <div style="flex:1;">
+          <b style="color:#065f46;">Montos visibles (Admin)</b><br>
+          <span style="font-size:12px;color:#047857;">Estás viendo las columnas financieras. Pulsa el botón para volver a ocultarlas.</span>
+        </div>
+        <button onclick="ocultarMontos()" style="background:#10b981;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;">🙈 Ocultar montos</button>
+      </div>
+      <div class="table-container" style="background:white; border-radius:16px; border:1px solid var(--borde); overflow:hidden; border-top:3px solid var(--acento);">
+        <!-- BARRA DE SCROLL SUPERIOR (espejo) -->
+        <div id="datos-scroll-top" class="top-scroll-bar" style="overflow-x:auto;overflow-y:hidden;border-bottom:1px solid var(--borde);background:#f8fafc;">
+          <div id="datos-scroll-top-inner" style="height:10px;"></div>
+        </div>
+        <div id="datos-scroll-main" style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+          <table id="datos-tabla" style="width:100%; border-collapse:collapse; min-width:1500px; table-layout:fixed;">
+            <thead>
+            <tr>
+                <th style="width:120px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;"># DOC</th>
+                <th style="width:90px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">FECHA EMI.</th>
+                <th style="width:170px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">COMPRADOR</th>
+                <th style="width:170px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">PASAJERO</th>
+                <th style="width:95px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:#ef4444;text-transform:uppercase;white-space:nowrap;">✈ F. SALIDA</th>
+                <th style="width:95px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:#ef4444;text-transform:uppercase;white-space:nowrap;">↩ F. RETORNO</th>
+                <th style="width:120px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">RUTA</th>
+                <th style="width:90px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">DNI / RUC</th>
+                <th style="width:95px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">AEROLÍNEA</th>
+                <th style="width:95px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">CÓD.RESERVA</th>
+                <th style="width:90px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">CELULAR</th>
+                <th style="width:140px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">DIRECCIÓN</th>
+                <th style="width:100px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">TIPO</th>
+                <th style="width:100px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">COUNTER</th>
+                <th style="width:105px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">MED.PAGO</th>
+                <th style="width:95px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">F. NACIM.</th>
+                <th style="width:85px; background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">COMIS.$</th>
+                <th style="width:85px; background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">NETO $</th>
+                <th style="width:85px; background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">COBRADO $</th>
+                <th style="width:85px; background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">IMP.IND.$</th>
+                <th style="width:90px; background:var(--fondo);padding:12px 10px;text-align:center;font-weight:700;font-size:10px;color:#10b981;text-transform:uppercase;white-space:nowrap;">EDITAR</th>
+                <th style="width:150px; background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:#0369a1;text-transform:uppercase;white-space:nowrap;">OBSERVACIÓN</th>
+              </tr>
+            </thead>
+            <tbody id="lista-datos">
+              <tr><td colspan="20" style="padding:40px; text-align:center; color:var(--texto-gris);">Cargando datos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL EDITAR REGISTRO -->
+  <div id="modalEditar" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:7000;padding:20px;overflow-y:auto;">
+    <div style="background:white;border-radius:20px;padding:30px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="font-weight:800;color:var(--primario);">Editar Registro</h2>
+        <button onclick="cerrarEditar()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#64748b;">&times;</button>
+      </div>
+      <input type="hidden" id="edit_id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Comprador (Titular)</label><input id="edit_titular" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Fecha del Documento</label><input id="edit_fecha_doc" type="text" placeholder="dia/mes/año" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">DNI / RUC</label><input id="edit_dni" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Pasajero</label><input id="edit_pasajero" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Celular</label><input id="edit_celular" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Ruta</label><input id="edit_ruta" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Aerolínea</label><input id="edit_aerolinea" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Cód. Reserva</label><input id="edit_reserva" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Método de Pago</label><input id="edit_metodo" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">F. Salida</label><input id="edit_salida" type="date" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">F. Retorno</label><input id="edit_retorno" type="date" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">F. Nacimiento</label><input id="edit_nacimiento" type="date" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Comisión ($)</label><input id="edit_comision" type="number" step="0.01" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Neto ($)</label><input id="edit_neto" type="number" step="0.01" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Total Cobrado ($)</label><input id="edit_total" type="number" step="0.01" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Imp. Individual ($)</label><input id="edit_importe" type="number" step="0.01" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div><label style="font-size:11px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;">Counter</label><input id="edit_counter" type="text" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;"></div>
+        <div style="grid-column:span 2;"><label style="font-size:11px;font-weight:700;color:#0369a1;text-transform:uppercase;">Observación</label><textarea id="edit_observacion" rows="2" style="width:100%;padding:9px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-top:4px;resize:vertical;"></textarea></div>
+        <div style="grid-column:span 2; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; margin-top:8px;">
+          <label style="font-size:12px;font-weight:700;color:#166534;display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" id="edit_checkin_activo" style="width:18px;height:18px;cursor:pointer;">
+            ALERTA DE CHECK-IN ACTIVA (Desmarcar para ocultar de la lista de Alertas)
+          </label>
+        </div>
+      </div>
+      <div style="margin-top:20px;display:flex;gap:10px;">
+        <button onclick="guardarEdicion()" id="btnGuardarEdicion" style="flex:1;padding:14px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:10px;font-weight:800;font-size:15px;cursor:pointer;">💾 Guardar Cambios</button>
+        <button onclick="cerrarEditar()" style="padding:14px 24px;background:#f1f5f9;color:var(--primario);border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TICKET -->
+  <div id="modalTicket" class="modal-ticket">
+    <div style="display:flex; flex-direction:column; align-items:center;">
+      <div class="ticket-papel" id="area-print"></div>
+      <div style="margin-top:20px; display:flex; gap:15px; justify-content:center;" class="no-print">
+        <button onclick="imprimirTicket()" style="padding:18px 40px; background:var(--exito); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer; font-size:16px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+          <span style="display:flex; align-items:center; gap:10px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            IMPRIMIR
+          </span>
+        </button>
+        <button onclick="document.getElementById('modalTicket').style.display='none'" style="padding:18px 40px; background:#64748b; color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer; font-size:16px;">CERRAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL IMPORTAR DESDE GOOGLE SHEETS -->
+  <div id="modalImportar" style="position:fixed;inset:0;background:rgba(0,0,0,0.88);display:none;place-items:center;z-index:7000;padding:20px;">
+    <div style="background:white;padding:30px;border-radius:20px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;">
+      <h3 style="margin-bottom:6px;font-size:18px;display:flex;align-items:center;gap:10px;"><span style="font-size:22px;">📥</span> Importar desde Google Sheets</h3>
+      <p style="color:#64748b;font-size:13px;margin-bottom:16px;">Copia todas las filas de tu Google Sheet (<b>sin encabezados</b>) y pégalas aquí:</p>
+      <ol style="color:#475569;font-size:12px;margin-bottom:14px;padding-left:18px;line-height:1.8;">
+        <li>Abre tu Google Sheet → selecciona todas las filas de datos (sin la fila de títulos)</li>
+        <li>Presiona <b>Ctrl+C</b> (copiar)</li>
+        <li>Haz clic en el cuadro de abajo y presiona <b>Ctrl+V</b> (pegar)</li>
+        <li>Presiona <b>IMPORTAR</b></li>
+      </ol>
+      <textarea id="import-textarea" placeholder="Pega aquí los datos copiados de Google Sheets..." style="width:100%;height:200px;border:2px solid #e2e8f0;border-radius:10px;padding:12px;font-size:12px;font-family:monospace;resize:vertical;outline:none;"></textarea>
+      <div id="import-progress" style="margin:10px 0;font-size:13px;font-weight:600;min-height:20px;color:#7c3aed;"></div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button onclick="importarDesdeSheet()" style="flex:1;padding:15px;background:#7c3aed;color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-size:15px;">📥 IMPORTAR</button>
+        <button onclick="document.getElementById('modalImportar').style.display='none'" style="padding:15px 25px;background:#e2e8f0;color:#475569;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-size:15px;">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════
+    //  SUPABASE CONFIG
+    // ═══════════════════════════════════════════
+    const SUPABASE_URL = 'https://yzuugqmomedkktmqfvak.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_HEiLGIdVxXhklObErdPXdg_2Dj4aw_m';
+    const _supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const PIN_CORRECTO = '1305';
+
+    let db = [];           // Cache local de ventas
+    let _guardando = false; // Flag anti-doble-submit
+
+    // ═══════════════════════════════════════════
+    //  HELPERS DE FECHA
+    // ═══════════════════════════════════════════
+    function _fmtDDMMYYYY(isoStr) {
+      if (!isoStr || isoStr === '---' || String(isoStr).trim() === '') return '---';
+      var s = String(isoStr).trim();
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+      if (/^\d{2}-\d{2}-\d{4}$/.test(s)) return s.replace(/-/g, '/');
+      var m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (m) return m[3] + '/' + m[2] + '/' + m[1];
+      return s;
+    }
+
+    function _parseFecha(str) {
+      if (!str || str === '---') return null;
+      var s = String(str).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { var d = new Date(s + 'T00:00:00'); return isNaN(d.getTime()) ? null : d; }
+      var m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+      if (m) return new Date(+m[3], +m[2]-1, +m[1]);
+      return null;
+    }
+
+    // ═══════════════════════════════════════════
+    //  FETCH VENTAS desde Supabase
+    // ═══════════════════════════════════════════
+    async function _fetchVentas(query) {
+      var { data, error } = await _supa
+        .from('ventas')
+        .select('*')
+        .order('correlativo', { ascending: true })
+        .order('id', { ascending: true });
+      if (error) throw error;
+      var mapa = {};
+      (data || []).forEach(function(f) {
+        var nd = f.numero_doc || ''; if (!nd) return;
+        if (!mapa[nd]) {
+          mapa[nd] = {
+            numeroDoc: nd, fecha: f.fecha||'', titular: f.titular||'',
+            doc: f.dni_ruc||'', codigo_reserva: f.codigo_reserva||'',
+            aerolinea: f.aerolinea||'', ruta: f.ruta||'',
+            fechaSalida: f.fecha_salida||'', fechaRetorno: f.fecha_retorno||'',
+            cel: f.celular||'', ofi: f.direccion||'',
+            tipo: f.tipo_emision||'', staff: f.counter||'',
+            met: f.metodo_pago||'', neto: String(f.neto||'0'),
+            comision: String(f.comision||'0'), total: String(f.total||'0'),
+            anulado: f.anulado||false, serie: f.serie||nd.split(' - ')[0],
+            correlativo: f.correlativo||0, pasajeros: []
+          };
+        }
+        mapa[nd].pasajeros.push({
+          nom: f.pasajero||'', nac: f.fecha_nacimiento||'',
+          pre: String(f.importe_individual||'0'),
+          sal: f.fecha_salida||'', ret: f.fecha_retorno||''
+        });
+      });
+      var ventas = Object.values(mapa);
+      if (query) {
+        var q = query.toUpperCase().trim();
+        // Detectar búsqueda por mes: "enero", "febrero", etc o "03/2026"
+        var mesesES = {enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,octubre:10,noviembre:11,diciembre:12};
+        var mesFiltro = mesesES[q.toLowerCase()];
+        if (mesFiltro) {
+          ventas = ventas.filter(function(v) {
+            var f = _parseFecha(v.fecha);
+            return f && (f.getMonth()+1) === mesFiltro;
+          });
+        } else {
+          ventas = ventas.filter(function(v) {
+            var haystack = [v.titular,v.doc,v.cel,v.ruta,v.staff,v.tipo,v.aerolinea,v.codigo_reserva,v.numeroDoc,v.fecha]
+              .join(' ').toUpperCase();
+            
+            // Si el user busca "12 de marzo" o similar
+            var fechaLarga = '';
+            var fObj = _parseFecha(v.fecha);
+            if(fObj) {
+              var mNames = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+              fechaLarga = fObj.getDate() + ' DE ' + mNames[fObj.getMonth()];
+            }
+            haystack += ' ' + fechaLarga;
+
+            // También buscar en nombres de pasajeros
+            var paxNames = (v.pasajeros||[]).map(function(p){return p.nom||'';}).join(' ').toUpperCase();
+            return haystack.indexOf(q) !== -1 || paxNames.indexOf(q) !== -1;
+          });
+        }
+      }
+      return ventas;
+    }
+
+    // ═══════════════════════════════════════════
+    //  INICIALIZACIÓN
+    // ═══════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+
+    window.onload = function() {
+      agregarFilaPax();
+      actualizarFechaHoy();
+      cargarDashboard();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    function actualizarFechaHoy() {
+      const hoy = new Date();
+      try {
+        const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        let fechaFormateada = hoy.toLocaleDateString('es-PE', opciones);
+        const fechaCapitalizada = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+        const el = document.getElementById('fechaHoy');
+        if (el) el.textContent = fechaCapitalizada;
+      } catch (e) {
+        const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+        const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+        const f = `${dias[hoy.getDay()]}, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+        const el = document.getElementById('fechaHoy');
+        if (el) el.textContent = f.charAt(0).toUpperCase() + f.slice(1);
+      }
+      setTimeout(actualizarFechaHoy, 60000);
+    }
+
+    // ═══════════════════════════════════════════
+    //  NAVEGACIÓN
+    // ═══════════════════════════════════════════
+    async function sincronizarAhora() {
+      const status = document.getElementById('sync-status');
+      if(status) { status.innerHTML = '&#9679; Sincronizando...'; status.style.color = '#3b82f6'; }
+      try {
+        db = await _fetchVentas();
+        cargarDashboard();
+        if(document.getElementById('boletos').classList.contains('activa')) cargarBoletos();
+        if(document.getElementById('check').classList.contains('activa')) cargarAlertas();
+        if(document.getElementById('pax').classList.contains('activa')) cargarPasajeros();
+        if(document.getElementById('datos').classList.contains('activa')) cargarDatos();
+        if(status) { status.innerHTML = '&#9679; Sincronizado'; status.style.color = '#10b981'; }
+      } catch(e) {
+        if(status) { status.innerHTML = '&#9679; Error Sync'; status.style.color = '#ef4444'; }
+      }
+    }
+
+    function ir(id, el) {
+      document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('activo'));
+      const seccion = document.getElementById(id);
+      if (seccion) seccion.classList.add('activa');
+      if (el && el.classList) el.classList.add('activo');
+      if (id === 'dash')    cargarDashboard();
+      if (id === 'boletos') cargarBoletos();
+      if (id === 'check')   cargarAlertas();
+      if (id === 'pax')     cargarPasajeros();
+      if (id === 'datos')   cargarDatos();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // ═══════════════════════════════════════════
+    //  PIN
+    // ═══════════════════════════════════════════
+    function abrirPin() {
+      document.getElementById('modalPin').style.display = 'grid';
+      document.getElementById('pinInput').focus();
+    }
+
+    function validarPin() {
+      const pin = document.getElementById('pinInput').value;
+      if (!pin) { alert('⚠️ Ingresa el PIN'); return; }
+      if (String(pin) === PIN_CORRECTO) {
+        document.getElementById('st-c').classList.remove('blur');
+        if (document.getElementById('st-n')) document.getElementById('st-n').classList.remove('blur');
+        if (document.getElementById('st-u')) document.getElementById('st-u').classList.remove('blur');
+        document.getElementById('l1').style.display = 'none';
+        document.getElementById('l2').style.display = 'none';
+        document.getElementById('modalPin').style.display = 'none';
+        document.getElementById('pinInput').value = '';
+      } else {
+        alert('❌ PIN Incorrecto');
+        document.getElementById('pinInput').value = '';
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    //  FORMULARIO - PASAJEROS
+    // ═══════════════════════════════════════════
+    function agregarFilaPax() {
+      const div = document.createElement('div');
+      div.className = 'pax-row';
+      div.innerHTML = `
+        <div class="campo">
+          <label>Nombre</label>
+          <input type="text" class="p_nom" required>
+        </div>
+        <div class="campo">
+          <label>SALIDA</label>
+          <input type="date" class="p_sal" required>
+        </div>
+        <div class="campo">
+          <label>RETORNO</label>
+          <input type="date" class="p_ret">
+        </div>
+        <div class="campo">
+          <label>NACIMIENTO</label>
+          <input type="date" class="p_nac" required>
+        </div>
+        <div class="campo">
+          <label>PRECIO</label>
+          <div style="display:flex; border:2px solid var(--borde-notorio); border-radius:8px; overflow:hidden; background:#fff; align-items:center;">
+            <select class="p_moneda" style="padding:10px 8px; border:none; border-right:1px solid #e2e8f0; font-size:13px; font-weight:700; background:transparent; color:#1e293b; outline:none; cursor:pointer;">
+              <option value="USD" selected>USD $</option>
+              <option value="PEN">PEN S/</option>
+            </select>
+            <input type="number" step="0.01" class="p_pre" oninput="calcularTotal()" required style="flex:1; border:none; padding:10px; font-size:14px; outline:none; background:transparent;">
+          </div>
+        </div>
+        <button type="button" onclick="this.parentElement.remove(); calcularTotal()" style="background:none; border:none; color:red; cursor:pointer;">
+          <i data-lucide="trash-2" size="18"></i>
+        </button>
+      `;
+      document.getElementById('pax-container').appendChild(div);
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function calcularTotal() {
+      let t = 0;
+      document.querySelectorAll('.p_pre').forEach(p => t += parseFloat(p.value || 0));
+      document.getElementById('i_total').value = t.toFixed(2);
+      const com = parseFloat(document.getElementById('i_comision').value || 0);
+      document.getElementById('i_neto').value = (t - com).toFixed(2);
+    }
+
+    // ═══════════════════════════════════════════
+    //  REGISTRAR VENTA → SUPABASE
+    // ═══════════════════════════════════════════
+    async function registrarVenta(e) {
+      e.preventDefault();
+      if (_guardando) return;
+
+      // Validaciones
+      if (!document.getElementById('i_ofi').value)   { alert('⚠️ Selecciona una oficina'); return; }
+      if (!document.getElementById('i_tipo').value)  { alert('⚠️ Selecciona un servicio'); return; }
+      if (!document.getElementById('i_staff').value) { alert('⚠️ Selecciona un counter'); return; }
+      if (!document.getElementById('i_meto').value)  { alert('⚠️ Selecciona una forma de pago'); return; }
+
+      const paxs = [];
+      let paxError = '';
+      document.querySelectorAll('.pax-row').forEach(function(r, idx) {
+        var nom = r.querySelector('.p_nom').value.trim();
+        var sal = r.querySelector('.p_sal').value;
+        var pre = r.querySelector('.p_pre').value;
+        if (!nom)  paxError = 'El pasajero ' + (idx+1) + ' no tiene nombre.';
+        if (!sal)  paxError = paxError || 'El pasajero ' + (idx+1) + ' no tiene fecha de salida.';
+        if (!pre)  paxError = paxError || 'El pasajero ' + (idx+1) + ' no tiene precio.';
+        paxs.push({
+          nom: nom.toUpperCase(),
+          sal: sal,
+          ret: r.querySelector('.p_ret').value || '---',
+          nac: r.querySelector('.p_nac').value,
+          pre: pre
+        });
+      });
+      if (paxs.length === 0) { alert('⚠️ Agrega al menos un pasajero'); return; }
+      if (paxError)          { alert('⚠️ ' + paxError); return; }
+
+      const v = {
+        fecha:          new Date().toLocaleDateString('es-PE'),
+        titular:        document.getElementById('i_titular').value.toUpperCase(),
+        doc:            document.getElementById('i_doc').value,
+        cel:            document.getElementById('i_cel').value,
+        ofi:            document.getElementById('i_ofi').options[document.getElementById('i_ofi').selectedIndex].text,
+        serie:          document.getElementById('i_ofi').value,
+        ruta:           document.getElementById('i_ruta').value.toUpperCase(),
+        aerolinea:      document.getElementById('i_aerolinea').value.toUpperCase(),
+        codigo_reserva: document.getElementById('i_codigo_reserva').value.toUpperCase(),
+        tipo:           document.getElementById('i_tipo').value,
+        staff:          document.getElementById('i_staff').value,
+        total:          document.getElementById('i_total').value,
+        neto:           document.getElementById('i_neto').value,
+        comision:       document.getElementById('i_comision').value,
+        met:            document.getElementById('i_meto').value,
+        pasajeros:      paxs
+      };
+
+      // UI loading
+      _guardando = true;
+      const btn = document.getElementById('btnGuardar');
+      const textoOriginal = btn.innerHTML;
+      btn.innerHTML = '<span style="display:flex;align-items:center;gap:10px;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Guardando en Supabase...</span>';
+      btn.disabled = true;
+
+      try {
+        // Obtener último correlativo
+        const { data: maxData } = await _supa.from('ventas').select('correlativo').order('correlativo', { ascending: false }).limit(1);
+        const ultimoCorr = (maxData && maxData.length > 0 && maxData[0].correlativo) ? parseInt(maxData[0].correlativo) : 0;
+        const correlativo = ultimoCorr + 1;
+        const serie       = v.serie || '001';
+        const numeroDoc   = serie + ' - N°' + String(correlativo).padStart(6, '0');
+
+        const filas = paxs.map(function(pax) {
+          return {
+            numero_doc: numeroDoc, fecha: v.fecha, titular: v.titular, dni_ruc: v.doc,
+            pasajero: pax.nom, codigo_reserva: v.codigo_reserva||'', aerolinea: v.aerolinea||'',
+            ruta: v.ruta, fecha_salida: pax.sal||'', fecha_retorno: _fmtDDMMYYYY(pax.ret||''),
+            celular: v.cel, direccion: v.ofi, tipo_emision: v.tipo, counter: v.staff,
+            metodo_pago: v.met, neto: parseFloat(v.neto||0), comision: parseFloat(v.comision||0),
+            total: parseFloat(v.total||0), fecha_nacimiento: pax.nac||'',
+            importe_individual: parseFloat(pax.pre||0), anulado: false,
+            serie: serie, correlativo: correlativo
+          };
+        });
+
+        const { error } = await _supa.from('ventas').insert(filas);
+        if (error) throw error;
+
+        v.correlativo = correlativo;
+        v.numeroDoc   = numeroDoc;
+        v.id          = correlativo;
+        v.anulado     = false;
+        db.unshift(v);
+        generarTicket(v);
+        e.target.reset();
+        document.getElementById('pax-container').innerHTML = '';
+        agregarFilaPax();
+        cargarStats();
+      } catch(err) {
+        alert('❌ Error al guardar: ' + (err.message || String(err)));
+      } finally {
+        _guardando = false;
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    //  ANULAR DOCUMENTO → SUPABASE
+    // ═══════════════════════════════════════════
+    async function anularDocumento(numeroDoc, correlativo, titular, total) {
+      if (!confirm('⚠️ ¿ANULAR ESTE DOCUMENTO?\n\nDocumento: ' + numeroDoc + '\nTitular: ' + titular + '\nTotal: $' + total + '\n\nEsta acción NO se puede deshacer.\n\n¿Continuar?')) return;
+      try {
+        const { error } = await _supa.from('ventas').delete().eq('numero_doc', numeroDoc);
+        if (error) throw error;
+        const doc = db.find(d => d.numeroDoc === numeroDoc || String(d.correlativo) === String(correlativo));
+        if (doc) { doc.anulado = true; doc.fechaAnulacion = new Date().toISOString(); }
+        alert('✅ Documento ANULADO correctamente');
+        cargarDashboard();
+        cargarBoletos();
+      } catch(err) {
+        alert('❌ Error al anular: ' + (err.message || String(err)));
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    //  CARGAR DASHBOARD
+    // ═══════════════════════════════════════════
+    async function cargarDashboard() {
+      try {
+        db = await _fetchVentas();
+        renderDashboard();
+        cargarStats();
+      } catch(err) {
+        document.getElementById('lista-global').innerHTML =
+          '<tr><td colspan="6" style="padding:40px;text-align:center;color:#ef4444;">❌ Error al cargar datos: ' + (err.message||'') + '</td></tr>';
+      }
+    }
+
+    function cargarStats() {
+      var totalBoletos = db.filter(function(v){ return !v.anulado; }).length;
+      var totalCobrado = 0, totalUtilidad = 0, alertas = 0;
+      var hoy = new Date(); hoy.setHours(0,0,0,0);
+      db.forEach(function(v) {
+        if (v.anulado) return;
+        totalCobrado += parseFloat(v.total||0)||0;
+        totalUtilidad += parseFloat(v.comision||0)||0;
+        var fSal = _parseFecha(v.fechaSalida);
+        if (fSal) { fSal.setHours(0,0,0,0); var d = Math.floor((fSal-hoy)/86400000); if (d>=0&&d<=2) alertas++; }
+      });
+      document.getElementById('st-t').innerText     = totalBoletos;
+      document.getElementById('st-c').innerText     = '$ ' + totalCobrado.toFixed(2);
+      if (document.getElementById('st-n')) document.getElementById('st-n').innerText = '$ ' + totalUtilidad.toFixed(2);
+      if (document.getElementById('st-u')) document.getElementById('st-u').innerText = '$ ' + totalUtilidad.toFixed(2);
+      document.getElementById('st-alert').innerText = alertas;
+    }
+
+    function renderDashboard() {
+      if (db.length === 0) {
+        document.getElementById('lista-global').innerHTML =
+          '<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--texto-gris);">No hay registros aún</td></tr>';
+        return;
+      }
+
+      document.getElementById('lista-global').innerHTML = db.map(v => {
+        const esAnulado   = v.anulado;
+        const estiloFila  = esAnulado ? 'opacity:0.6;background:#fef2f2;' : '';
+        const estiloTexto = esAnulado ? 'text-decoration:line-through;color:#999;' : '';
+        const estadoCol   = esAnulado
+          ? '<span style="color:#dc2626;font-weight:800;font-size:14px;">❌ ANULADO</span>'
+          : '<span style="color:var(--exito)">● Emitido</span>';
+        const accionCol   = esAnulado
+          ? '<span style="color:#dc2626;font-size:12px;font-weight:700;">ANULADO</span>'
+          : '<button class="btn-anular" onclick="anularDocumento(\'' + (v.numeroDoc||'') + '\',\'' + (v.correlativo||'') + '\',\'' + v.titular.replace(/'/g,"\\'") + '\',\'' + v.total + '\')">Anular</button>';
+
+        return '<tr style="' + estiloFila + '">' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '">' + (v.fecha||'') + '</td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '">' + (v.serie||'') + '</td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '"><b>' + (v.titular||'') + '</b></td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '">$ ' + (v.total||'0.00') + '</td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);">' + estadoCol + '</td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);">' + accionCol + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    // ═══════════════════════════════════════════
+    //  CARGAR BOLETOS
+    // ═══════════════════════════════════════════
+    async function cargarBoletos() {
+      document.getElementById('lista-boletos').innerHTML =
+        '<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--texto-gris);">Cargando boletos...</td></tr>';
+      try {
+        db = await _fetchVentas();
+        // SORT BOLETOS: Newest to Oldest (Recientes a más antiguos)
+        db.sort(function(a, b) {
+          var d1 = _parseFecha(a.fecha) || new Date(0);
+          var d2 = _parseFecha(b.fecha) || new Date(0);
+          if (d1.getTime() === d2.getTime()) return (b.correlativo || 0) - (a.correlativo || 0); // Stable sort fallback
+          return d2 - d1;
+        });
+        renderBoletos();
+      } catch(err) {
+        document.getElementById('lista-boletos').innerHTML =
+          '<tr><td colspan="8" style="padding:40px;text-align:center;color:#ef4444;">❌ Error al cargar boletos</td></tr>';
+      }
+    }
+
+    function renderBoletos() {
+      if (db.length === 0) {
+        document.getElementById('lista-boletos').innerHTML =
+          '<tr><td colspan="8" style="padding:40px;text-align:center;">No hay boletos</td></tr>';
+        return;
+      }
+
+      document.getElementById('lista-boletos').innerHTML = db.map(v => {
+        const esAnulado   = v.anulado;
+        const estiloFila  = esAnulado ? 'opacity:0.6;background:#fef2f2;' : '';
+        const estiloTexto = esAnulado ? 'text-decoration:line-through;color:#999;' : '';
+        const numDoc      = v.numeroDoc || ((v.serie||'001') + '-' + String(v.correlativo||'').padStart(6,'0'));
+
+        // Construcción de info de pasajeros CON fecha de nacimiento sincronizada
+        let paxHTML = '';
+        if (v.pasajeros && v.pasajeros.length > 0) {
+          paxHTML = v.pasajeros.map(function(p) {
+            var nacStr = String(p.nac || '').trim();
+            var nacLabel = '';
+            if (nacStr && nacStr !== '---') {
+              // Convertir yyyy-mm-dd → dd/mm/yyyy para mostrar
+              if (/^\d{4}-\d{2}-\d{2}$/.test(nacStr)) {
+                var pts = nacStr.split('-');
+                nacStr = pts[2] + '/' + pts[1] + '/' + pts[0];
+              }
+              nacLabel = ' <span style="color:#94a3b8;font-size:10px;">(Nac: ' + nacStr + ')</span>';
+            }
+            return '<div style="font-size:12px;">' + (p.nom||'') + nacLabel + '</div>';
+          }).join('');
+        } else {
+          paxHTML = '<span style="color:#94a3b8;">-</span>';
+        }
+
+        let columnaBotones = '';
+        if (esAnulado) {
+          columnaBotones =
+            '<div style="text-align:center;">' +
+              '<div style="color:#dc2626;font-weight:800;font-size:16px;text-transform:uppercase;">❌ ANULADO</div>' +
+              '<div style="color:#999;font-size:11px;">' + (v.fechaAnulacion ? new Date(v.fechaAnulacion).toLocaleDateString('es-PE') : '') + '</div>' +
+            '</div>';
+        } else {
+          const safeNd = (v.numeroDoc||'').replace(/'/g,"\\'");
+          const safeTi = (v.titular||'').replace(/'/g,"\\'");
+          columnaBotones =
+            '<div style="display:flex;flex-direction:column;gap:3px;min-width:76px;">' +
+            '<button onclick="verBoletoCompleto(\'' + safeNd + '\')" style="background:var(--acento);color:white;border:none;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;width:100%;">👁 Ver</button>' +
+            '<button onclick="reimprimirBoleto(\'' + safeNd + '\')" style="background:var(--exito);color:white;border:none;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;width:100%;">🖨 Reimpr.</button>' +
+            '<button class="btn-anular" onclick="anularDocumento(\'' + safeNd + '\',\'' + (v.correlativo||'') + '\',\'' + safeTi + '\',\'' + (v.total||0) + '\')" style="width:100%;font-size:11px;padding:5px 6px;">✕ Anular</button>' +
+            '</div>';
+        }
+
+        return '<tr style="' + estiloFila + '">' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '">' + (v.fecha||'') + '</td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '"><strong>' + numDoc + '</strong></td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '"><b>' + (v.titular||'') + '</b></td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '">' + (v.ruta||'') + '</td>' +
+          '<td style="padding:12px 15px;border-bottom:1px solid var(--borde);' + estiloTexto + '">' + paxHTML + '</td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '"><strong>$ ' + (v.total||'0.00') + '</strong></td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);' + estiloTexto + '">' + (v.staff||'') + '</td>' +
+          '<td style="padding:15px;border-bottom:1px solid var(--borde);">' + columnaBotones + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    // ═══════════════════════════════════════════
+    //  VER DETALLE + REIMPRIMIR
+    // ═══════════════════════════════════════════
+    function verBoletoCompleto(numeroDoc) {
+      const doc = db.find(d => d.numeroDoc === numeroDoc);
+      if (!doc) { alert('❌ Documento no encontrado'); return; }
+
+      let detalles =
+        '📋 ' + doc.numeroDoc + '\n' +
+        '📅 ' + (doc.fecha||'') + '\n' +
+        '🏢 ' + (doc.ofi||'') + '\n\n' +
+        '👤 COMPRADOR:\n' +
+        '   ' + (doc.titular||'') + '\n' +
+        '   DNI: ' + (doc.doc||'') + '\n' +
+        '   Tel: ' + (doc.cel||'') + '\n\n' +
+        '✈️ VIAJE:\n' +
+        '   Ruta: ' + (doc.ruta||'') + '\n' +
+        '   Aerolínea: ' + (doc.aerolinea||'N/A') + '\n' +
+        '   Código: ' + (doc.codigo_reserva||'N/A') + '\n\n' +
+        '💰 PAGOS:\n' +
+        '   Total: $' + (doc.total||0) + '\n' +
+        '   Neto: $' + (doc.neto||0) + '\n' +
+        '   Método: ' + (doc.met||'') + '\n\n' +
+        '👨‍💼 Counter: ' + (doc.staff||'') + '\n\n' +
+        '👥 PASAJEROS (' + (doc.pasajeros ? doc.pasajeros.length : 0) + '):\n';
+
+      if (doc.pasajeros) {
+        doc.pasajeros.forEach(function(p, i) {
+          detalles += '\n' + (i+1) + '. ' + (p.nom||'') +
+            '\n   Salida: ' + (p.sal||'') +
+            '\n   Retorno: ' + (p.ret||'') +
+            '\n   Nacimiento: ' + (p.nac||'') +
+            '\n   Precio: $' + (p.pre||0) + '\n';
+        });
+      }
+      alert(detalles);
+    }
+
+    function reimprimirBoleto(numeroDoc) {
+      const doc = db.find(d => d.numeroDoc === numeroDoc);
+      if (!doc) { alert('❌ Documento no encontrado en caché. Recarga la sección Boletos.'); return; }
+      generarTicket(doc);
+    }
+
+    // ═══════════════════════════════════════════
+    //  CARGAR ALERTAS (desde cache Supabase)
+    // ═══════════════════════════════════════════
+    async function cargarAlertas() {
+      document.getElementById('lista-alertas').innerHTML =
+        '<tr><td colspan="4" style="padding:40px;text-align:center;color:var(--texto-gris);">Cargando alertas...</td></tr>';
+      try {
+        if (db.length === 0) db = await _fetchVentas();
+        var hoy = new Date(); hoy.setHours(0,0,0,0);
+        var alertas = [];
+        db.filter(function(v){ return !v.anulado; }).forEach(function(v) {
+          var cel = v.cel || '';
+          
+          // SALIDA
+          var fSal = _parseFecha(v.fechaSalida);
+          if (fSal) { 
+            var f = new Date(fSal); f.setHours(0,0,0,0);
+            var ds = Math.floor((f-hoy)/86400000); 
+            if (ds >= -1 && ds <= 2) {
+              var paxs = (v.pasajeros||[]).map(function(p){return p.nom||'';}).join(', ');
+              alertas.push({ 
+                pasajero: paxs || v.titular, titular: v.titular, ruta: v.ruta, 
+                salida: v.fechaSalida, tipo: 'SALIDA', cel: cel, diasFaltan: ds, key: (v.titular||'')+'|SALIDA|'+(v.fechaSalida||'')
+              }); 
+            }
+          }
+          
+          // RETORNO
+          var fRet = _parseFecha(v.fechaRetorno);
+          if (fRet && v.fechaRetorno && v.fechaRetorno !== '---') { 
+            var f2 = new Date(fRet); f2.setHours(0,0,0,0);
+            var dr = Math.floor((f2-hoy)/86400000); 
+            if (dr >= -1 && dr <= 2) {
+              var paxs2 = (v.pasajeros||[]).map(function(p){return p.nom||'';}).join(', ');
+              alertas.push({ 
+                pasajero: paxs2 || v.titular, titular: v.titular, ruta: v.ruta, 
+                salida: v.fechaRetorno, tipo: 'RETORNO', cel: cel, diasFaltan: dr, key: (v.titular||'')+'|RETORNO|'+(v.fechaRetorno||'')
+              }); 
+            }
+          }
+        });
+        // Ordenar: primero los más antiguos (negativos = verdes), luego los próximos
+        alertas.sort(function(a,b){ return a.diasFaltan - b.diasFaltan; });
+        
+        // Guardar para la exportación global si es necesario
+        window._alertasExportables = alertas;
+        
+        renderAlertas(alertas);
+      } catch(err) {
+        document.getElementById('lista-alertas').innerHTML =
+          '<tr><td colspan="4" style="padding:40px;text-align:center;color:#ef4444;">❌ Error al cargar alertas</td></tr>';
+      }
+    }
+
+    // Alertas descartadas manualmente (verde)
+    var _alertasDescartadas = JSON.parse(localStorage.getItem('killa_alertas_desc') || '[]');
+    function descartarAlerta(key) {
+      if (!_alertasDescartadas.includes(key)) _alertasDescartadas.push(key);
+      localStorage.setItem('killa_alertas_desc', JSON.stringify(_alertasDescartadas));
+      cargarAlertas();
+    }
+
+    function renderAlertas(alertasTodas) {
+      // Separar las activas de las descartadas (estas últimas no se muestran)
+      var alertasActivas = alertasTodas.filter(function(a) {
+        return !_alertasDescartadas.includes(a.key);
+      });
+      document.getElementById('st-alert').innerText = alertasActivas.length;
+      if (alertasActivas.length === 0) {
+        document.getElementById('lista-alertas').innerHTML =
+          '<tr><td colspan="4" style="padding:40px;text-align:center;">No hay alertas de check-in</td></tr>';
+        return;
+      }
+
+      document.getElementById('lista-alertas').innerHTML = alertasActivas.map(function(a) {
+        // Restaurar colores originales: rojo claro para tarjeta, rojo oscuro para badge
+        const colorFondo = '#fee2e2'; // Rojo claro
+        const colorBadge = '#dc2626'; // Rojo oscuro
+        
+        const df = parseInt(a.diasFaltan || 0);
+        let etiqueta = df === 0 ? 'HOY' : df === 1 ? 'MAÑANA' : df === 2 ? 'EN 2 DÍAS' : 'AYER';
+
+        return '<tr style="background:' + colorFondo + ';">' +
+          '<td style="padding:15px;"><div style="font-weight:700;">' + (a.pasajero||a.titular||'') + '</div><div style="font-size:11px;">Titular: ' + (a.titular||'') + '</div></td>' +
+          '<td style="padding:15px;">' + (a.ruta||'') + '</td>' +
+          '<td style="padding:15px;">' +
+            '<div style="display:inline-block;background:' + colorBadge + ';color:white;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">' + etiqueta + '</div>' +
+            '<div style="font-size:13px;font-weight:600;margin-top:4px;color:' + colorBadge + ';">' + (a.tipo||'') + '</div>' +
+            '<div style="font-size:12px;color:#64748b;">' + (a.salida||a.fecha||'') + '</div>' +
+          '</td>' +
+          '<td style="padding:15px;text-align:center;">' +
+            '<div style="display:flex;flex-direction:column;gap:6px;align-items:center;">' +
+            '<a href="https://wa.me/51' + (a.cel||'') + '?text=Hola%20' + encodeURIComponent(a.titular||'') + '" target="_blank" style="background:#10b981;color:white;padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:700;display:inline-block;font-size:12px;">WhatsApp</a>' +
+            '<button onclick="descartarAlerta(\'' + (a.key).replace(/'/g,"\\'") + '\')" style="background:#22c55e;color:white;border:none;padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:700;font-size:11px;">✅ Marcar OK</button>' +
+            '</div>' +
+          '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    // ═══════════════════════════════════════════
+    //  DESCARGAR CHECK-IN
+    // ═══════════════════════════════════════════
+    function descargarCheckin() {
+      var alertasTodas = window._alertasExportables || [];
+      var alertasActivas = alertasTodas.filter(function(a) {
+        return !_alertasDescartadas.includes(a.key);
+      });
+      
+      if (alertasActivas.length === 0) {
+        alert('ℹ️ No hay alertas activas para descargar.');
+        return;
+      }
+      
+      var csv = 'PASAJEROS,TITULAR,RUTA,FECHA,TIPO,CELULAR,ESTADO\n';
+      alertasActivas.forEach(function(a) {
+        var estado = (a.diasFaltan < 0) ? 'REALIZADO' : 'PENDIENTE';
+        var fila = [
+          '"' + (a.pasajero||'').replace(/"/g, '""') + '"',
+          '"' + (a.titular||'').replace(/"/g, '""') + '"',
+          '"' + (a.ruta||'').replace(/"/g, '""') + '"',
+          '"' + (a.salida||'').replace(/"/g, '""') + '"',
+          '"' + (a.tipo||'').replace(/"/g, '""') + '"',
+          '"' + (a.cel||'').replace(/"/g, '""') + '"',
+          '"' + estado + '"'
+        ];
+        csv += fila.join(',') + '\n';
+      });
+      
+      var blob = new Blob(["\uFEFF"+csv], {type: "text/csv;charset=utf-8;"});
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "Checkin_Activos_" + new Date().getTime() + ".csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // (renderAlertasLocal ya no se necesita — alerts se calculan directamente)
+
+    // ═══════════════════════════════════════════
+    //  CARGAR PASAJEROS (desde cache)
+    // ═══════════════════════════════════════════
+    async function cargarPasajeros() {
+      try {
+        if (db.length === 0) db = await _fetchVentas();
+        const grid = document.getElementById('pax-grid');
+        var mapa = {};
+        db.forEach(function(v) { var key = v.titular+'||'+v.cel; if (!mapa[key]) mapa[key] = { titular: v.titular, doc: v.cel }; });
+        var pasajeros = Object.values(mapa);
+        if (pasajeros.length === 0) { grid.innerHTML = '<p style="color:var(--texto-gris);">No hay pasajeros registrados</p>'; return; }
+        
+        // Función inyectada en string para el onClick
+        window._clickPax = function(nombre) {
+          document.getElementById('buscMaestro').value = nombre;
+          abrirDatos(document.querySelector('[onclick="abrirDatos(this)"]'));
+          buscar();
+        };
+
+        grid.innerHTML = pasajeros.map(function(p) {
+          const inicial = p.titular ? p.titular[0] : 'P';
+          return '<div onclick="_clickPax(\'' + (p.titular||'').replace(/'/g,"\\'") + '\')" style="background:white;padding:20px;border-radius:16px;border:1px solid var(--borde);display:flex;align-items:center;gap:15px;cursor:pointer;transition:transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform=\'scale(1.02)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.08)\'" onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'none\'">' +
+            '<div style="width:50px;height:50px;background:var(--primario);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;">' + inicial + '</div>' +
+            '<div><b style="color:var(--primario);">' + (p.titular||'') + '</b><br><small style="color:var(--texto-gris);">TEL: ' + (p.doc||'') + '</small></div>' +
+            '</div>';
+        }).join('');
+      } catch(err) {
+        document.getElementById('pax-grid').innerHTML = '<p style="color:#ef4444;">❌ Error al cargar pasajeros</p>';
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    //  BUSCAR
+    // ═══════════════════════════════════════════
+    async function buscar() {
+      const q = document.getElementById('buscMaestro').value.trim();
+      if (!q) {
+        // Sin query: recargar sección activa
+        var secActiva = '';
+        document.querySelectorAll('.seccion').forEach(function(s) { if (s.classList.contains('activa')) secActiva = s.id; });
+        if (secActiva === 'boletos') { cargarBoletos(); return; }
+        if (secActiva === 'datos')   { cargarDatos(); return; }
+        if (secActiva === 'pax')     { cargarPasajeros(); return; }
+        if (secActiva === 'check')   { cargarAlertas(); return; }
+        cargarDashboard(); return;
+      }
+      // Detectar sección activa
+      var seccionActiva = 'dash';
+      document.querySelectorAll('.seccion').forEach(function(s) { if (s.classList.contains('activa')) seccionActiva = s.id; });
+
+      try {
+        var QU = q.toUpperCase().trim();
+
+        if (seccionActiva === 'datos') {
+          // Filtrar directamente en caché de datos (o recargar)
+          var rows = window._datosRowsCache || [];
+          if (!rows.length) { await cargarDatos(); rows = window._datosRowsCache || []; }
+          var filtrados = rows.filter(function(r) {
+            var fLarga = '';
+            var rObj = _parseFecha(r.fecha);
+            if(rObj) {
+               var mesArr = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+               fLarga = rObj.getDate() + ' DE ' + mesArr[rObj.getMonth()];
+            }
+            var hay = [r.titular,r.pasajero,r.dni_ruc,r.celular,r.ruta,r.aerolinea,r.codigo_reserva,r.numero_doc,r.counter,r.tipo_emision,r.fecha, fLarga]
+              .join(' ').toUpperCase();
+            return hay.indexOf(QU) !== -1;
+          });
+          renderDatos(filtrados);
+          return;
+        }
+
+        if (seccionActiva === 'boletos') {
+          db = await _fetchVentas(q);
+          renderBoletos(db);
+          return;
+        }
+
+        if (seccionActiva === 'pax') {
+          db = await _fetchVentas(q);
+          cargarPasajeros();
+          return;
+        }
+
+        if (seccionActiva === 'check') {
+          db = await _fetchVentas(q);
+          cargarAlertas();
+          return;
+        }
+
+        // Por defecto: Balance
+        db = await _fetchVentas(q);
+        renderDashboard();
+        document.querySelectorAll('.menu-item').forEach(function(m) { m.classList.remove('activo'); });
+        var dashMenu = document.querySelector('[onclick="ir(\'dash\', this)"]');
+        if (dashMenu) dashMenu.classList.add('activo');
+        document.querySelectorAll('.seccion').forEach(function(s) { s.classList.remove('activa'); });
+        document.getElementById('dash').classList.add('activa');
+      } catch(err) {
+        alert('❌ Error al buscar: ' + (err.message||''));
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    //  GENERAR TICKET (100% IDÉNTICO AL ORIGINAL)
+    // ═══════════════════════════════════════════
+    function generarTicket(v) {
+      let filas = '';
+      (v.pasajeros || []).forEach(function(p) {
+
+        // ── Fecha de nacimiento: soporte múltiple formatos (robusto y permanente) ──
+        var nacimiento = '---';
+        var nacStr = String(p.nac || '').trim();
+        if (nacStr && nacStr !== '---' && nacStr !== '') {
+          // yyyy-mm-dd (del input type="date")
+          if (/^\d{4}-\d{2}-\d{2}$/.test(nacStr)) {
+            var pts = nacStr.split('-');
+            nacimiento = pts[2] + '/' + pts[1] + '/' + pts[0].slice(-2);
+          }
+          // dd/mm/yyyy (ya formateado)
+          else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(nacStr)) {
+            var pts = nacStr.split('/');
+            nacimiento = pts[0].padStart(2,'0') + '/' + pts[1].padStart(2,'0') + '/' + pts[2].slice(-2);
+          }
+          // dd/mm/yy (ya en formato corto)
+          else if (/^\d{1,2}\/\d{1,2}\/\d{2}$/.test(nacStr)) {
+            nacimiento = nacStr;
+          }
+          // dd-mm-yyyy
+          else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(nacStr)) {
+            var pts = nacStr.split('-');
+            nacimiento = pts[0].padStart(2,'0') + '/' + pts[1].padStart(2,'0') + '/' + pts[2].slice(-2);
+          }
+        }
+
+        // ── Importe: blindado contra undefined, null, vacío ──
+        var precio = 0;
+        var preStr = String(p.pre !== undefined && p.pre !== null ? p.pre : '0').trim();
+        if (preStr !== '') {
+          var parsedPre = parseFloat(preStr);
+          if (!isNaN(parsedPre)) precio = parsedPre;
+        }
+
+        filas += '<tr><td>' + (p.nom||'') + '</td><td>' + nacimiento + '</td><td>$ ' + precio.toFixed(2) + '</td></tr>';
+      });
+
+      const testamento =
+        '<b>CONDICIONES DEL SERVICIO</b><br>' +
+        '• KILLAS TRAVEL BRINDARA A EL CLIENTE SIN ESTAR SUBORDINADO, EL SERVICIO DE VENTA DE PASAJES AEREOS RESERVAS Y SERVICIOS CONEXOS, BAJO LA MODALIDAS DE CONTADO SE ENTIENDE COMO SERVICIO EFECTUADO POR PARTE DE KILLAS TRAVEL, LA ENTREGA DEL TICKET VOUCHER DE SERVICIOS O LIQUIDACION DE SERVICIOS A EL CLIENTE.<br>' +
+        '• KILLAS TRAVEL ENTREGARA LOS PASAJES Y SERVICIOS QUE CORRESPONDAN EN SUS INSTALACIONES, O DE SER EL CASO, EN EL LUGAR QUE EL SEÑALE, AL ALCANSE DE LAS SUCURSALES DE KILLAS TRAVEL.<br>' +
+        '• KILLA\'S TRAVEL SE COMPROMETE A BRINDAR A EL CLIENTE LAS MEJORES CONDICIONES ALA FECHA DE SOLICITUD DEL SERVICIO DICHAS CONDICIONES SE MANTENDRAN VIGENTES HASTA LAS FECHAS LIMITES DETERMINADAS POR LOS PROVEEDORES O LINEAS AEREAS ACEPTANDO EL CLIENTE LAS CONDICIONES IMPUESTAS POR LAS LINEAS AEREAS EN LO REFERENTE A CADUCIDADES PARA LA COMPRA O EMISION DEL BOLETO AEREO, CAMBIO DE FECHA, CAMBIO DE RUTA U OTRO TIPO DE CONDICIONES INCORPORADAS EN LA TARIFA DEL BOLETO Y/O SERVICIOS, ASI COMO LOS GASTOS ADMINISTRATIVOS POR SERVICIO DE RESERVA CONFIRMACION, ATENCION AEROPUERTO, FINANCIAMIENTO Y COBRANZA, ATENCION DE EMERGENCIA U OTROS SERVICIOS DE LA AGENCIA.<br>' +
+        '• EL CLIENTE DECLARA CONOCER QUE KILLAS TRAVEL BRINDA SUS SERVICIOS EN EL AMBITO TURISTICO COMO INTERMEDIARIO DE LAS LINEAS AEREAS Y/U OPERADORES, HOTELES, RENTADORAS DE AUTOS Y SERVICIOS CONEXOS, POR LO QUE LIBERA A KILLA\'S TRAVEL DE CUALQUIER RESPONABILIDAD DIRECTA POR LOS SERVICIOS CONTRATADOS EN EL CASO DE REPROGRAMACION DE VUELOS, CANCELACIONES DE ITINERARIOS, SUSPENCION DE VUELOS O SERVICIOS SINESTRO Y OTROS GENERADOS POR LAS LINEAS AEREAS Y/U OPERADORES DEL SERVICIO.<br>' +
+        '• EN CASO DE NO PODER REALIZARSE EL SERVICIO DE ACUERDO A LO PROGRAMADO/VENDIDO POR MOTIVOS DE FUERZA MAYOR TALES COMO HUELGAS, MOTINES, PARALIZACIONES, SINESTROS ENTRE OTRAS CIRCUNSTANCIAS, KILLA\'S TRAVEL, REALIZARA SUS MEJORES ESFUERZOS PARA REPROGRAMAR SUS SERVICIOS, SIN EMBARGO, NO ES RESPONSABLE POR LAS PERDIDAS QUE ESTOS PODRIAN GENERAR EN EL PASAJERO O CLIENTE, NI DE LOS GASTOS ADICIONALES QUE IMPLIQUE EL SERVICIO DE REPROGRAMACION O NUEVAS RESERVAS.<br>' +
+        '• EL CLIENTE CANCELARA LOS SERVICIOS SOLICITADOS, RESERVADOS Y CONFIRMADOS AL CONTADO Y EN MONEDA EXTRANJERA EN CASO EL CLIENTE DESEE EFECTUAR EL PAGO EN NUEVOS SOLES DEBERA EFECTUARLO AL TIPO DE CAMBIO DE NUESTRA AREA DE CAJA.<br>' +
+        '• SOLO SE CONSIDERARAN VALIDAS LAS CANCELACIONES REALIZADAS EN NUESTRA CAJA AUTORIZADA EN KILLA\'S TRAVEL Y AQUELLAS GENERADAS A NUESTRO PERSONAL AUTORIZADO DE COBRANZA-CONTRAENTREGA POR NINGUN MOTIVO SE ACEPTARÁN PAGOS A NUESTROS MENSAJEROS Y/U COUNTERS, PARA CUALQUIER VERIFICACION NUESTROS TELEFONOS DE SUPERVICION SON 382-6865.<br>' +
+        '• EN CASO QUE EL BOLETO AEREO NO SEA UTILIZADO POR EL CLIENTE, ESTE AUTORIZA A KILLA\'S TRAVEL A TRAMITAR EL REEMBOLSO CORRESPONDIENTE ANTE LA LINEA AEREA SIEMPRE Y CUANDO LO PERMITA ESTA ULTIMA Y LA TARIFA ADQUIRIDA (OBSERVAR LAS CONDICIONES DE REEMBOLSO O NO REEMBOLSABLE EN EL CASO DE TARIFAS PROMOCIONALES). AL MONTO PAGADO, SE LE DESCONTARAN LAS PENALIDADES Y GASTOS ADMINISTRATIVOS DE LA LINEA AEREA Y DE KILLA\'S TRAVEL QUE SE APLICAN SOBRE EL VALOR TOTAL DEL BOLETO, INCLUYENDO EL I.G.V. ESTO NO IMPLICA LA EXCEPCION DEL PAGO DE LA FACTURA/LIQUIDACION RELACIONADA CON LA OPERACION DENTRO DE LOS PLAZOS CONTRACTUALMENTE ESTABLECIDOS.<br><br>' +
+        '<b>ADMINISTRADORA: GUISELL CARLA LUNA QUISPE.</b>';
+
+      const numDocStr = v.numeroDoc || ((v.serie||'001') + ' - N°' + String(v.correlativo||1).padStart(6,'0'));
+      const subtitulo = v.tipo === 'BOLETOS AÉREOS'     ? 'REMISIÓN DE BOLETO AÉREO' :
+                        v.tipo === 'REMISIÓN'  ? 'REMISIÓN' :
+                        v.tipo === 'PAQUETES TURÍSTICOS' ? 'REMISIÓN DE PAQUETE TURÍSTICO' :
+                        v.tipo === 'SEGUROS DE VIAJE'    ? 'REMISIÓN DE SEGURO DE VIAJE' :
+                        v.tipo === 'RESERVAS DE HOTEL'   ? 'REMISIÓN DE RESERVA DE HOTEL' :
+                        'REMISIÓN DE ' + (v.tipo||'');
+
+      document.getElementById('area-print').innerHTML =
+        '<div class="t-header">' +
+          '<div style="text-align:center;margin-bottom:3px;">' +
+            '<img src="https://i.ibb.co/SScGQck/logo-killa.png" style="width:130px;height:auto;margin:0 auto;display:block;filter:brightness(0);" alt="Killa\'s Travel" onerror="this.style.display=\'none\'">' +
+          '</div>' +
+          '<b>KILLAS TRAVEL & ADVENTURE E.I.R.L.</b><br>' +
+          'R.U.C. 20600721951<br>' +
+          (v.ofi||'') + '<br>' +
+          '987366066 - 960811989 - 917375402<br>' +
+          'reservas@killastravel.com' +
+        '</div>' +
+        '<div class="t-dots"></div>' +
+        '<div class="t-title">DOCUMENTO DE COBRANZA<br>' + numDocStr + '</div>' +
+        '<div class="t-dots"></div>' +
+        '<div class="t-subtitle">' + subtitulo + '</div>' +
+        '<div class="t-row"><span class="t-label">Señor(a)</span><span class="t-valor">: ' + (v.titular||'') + '</span></div>' +
+        '<div class="t-row"><span class="t-label">Fecha</span><span class="t-valor">: ' + (v.fecha||'') + '</span></div>' +
+        '<div class="t-row"><span class="t-label">Celular</span><span class="t-valor">: ' + (v.cel||'') + '</span></div>' +
+        '<div class="t-row"><span class="t-label">Ruta</span><span class="t-valor">: ' + (v.ruta||'') + '</span></div>' +
+        '<div class="t-row"><span class="t-label">Counter</span><span class="t-valor">: ' + (v.staff||'') + '</span></div>' +
+        '<div class="t-dots"></div>' +
+        '<table class="t-tabla">' +
+          '<thead><tr><th>PAX</th><th>F.NACIMIENTO</th><th>IMPORTE</th></tr></thead>' +
+          '<tbody>' + filas + '</tbody>' +
+        '</table>' +
+        '<div class="t-total-box">TOTAL : $ ' + parseFloat(v.total||0).toFixed(2) + '</div>' +
+        '<div class="t-conditions">' + testamento + '</div>' +
+        '<div class="qr-container">' +
+          '<img src="https://i.ibb.co/9kk5JvMN/qr-killa.png" class="qr-img" alt="QR">' +
+        '</div>';
+
+      document.getElementById('modalTicket').style.display = 'grid';
+    }
+
+    // ═══════════════════════════════════════════
+    //  IMPRIMIR TICKET
+    // ═══════════════════════════════════════════
+    function imprimirTicket() {
+      const iframe    = document.createElement('iframe');
+      iframe.style.position = 'absolute';
+      iframe.style.width    = '0px';
+      iframe.style.height   = '0px';
+      iframe.style.border   = 'none';
+      document.body.appendChild(iframe);
+
+      const iframeDoc  = iframe.contentWindow.document;
+      const printStyles =
+        '<style>' +
+        '@page{size:80mm auto;margin:0;}' +
+        'body{margin:0;padding:0;}' +
+        '*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important;}' +
+        '.ticket-papel{width:72mm;background:white;padding:4mm 3mm 2mm 3mm;color:#000!important;font-family:Arial,sans-serif;line-height:1.05;margin:0;page-break-after:always;}' +
+        '.t-header{text-align:center;font-size:7pt;margin:0;padding:0;line-height:1.1;}' +
+        '.t-header b{font-size:8.5pt;}' +
+        '.t-header img{margin:0 0 2px 0;padding:0;display:block;}' +
+        '.t-dots{border-top:1.5pt dotted #000;margin:4px 0;}' +
+        '.t-title{text-align:center;font-weight:bold;font-size:10.5pt;margin:3px 0;line-height:1.1;}' +
+        '.t-subtitle{text-align:center;font-weight:bold;font-size:8.5pt;margin:3px 0 5px 0;text-transform:uppercase;}' +
+        '.t-row{display:flex;font-size:8pt;margin-bottom:1px;}' +
+        '.t-label{width:90px;font-weight:bold;}' +
+        '.t-valor{color:#000!important;}' +
+        '.t-tabla{width:100%;border-collapse:collapse;margin:5px 0 4px 0;font-size:7.5pt;border:none;}' +
+        '.t-tabla th{text-align:left;border:none;border-bottom:1pt solid #000;padding:2px 3px;font-weight:bold;}' +
+        '.t-tabla td{padding:2px 3px;border:none;vertical-align:top;color:#000!important;}' +
+        '.t-tabla tr:not(:last-child) td{border-bottom:1pt dotted #ccc;}' +
+        '.t-total-box{text-align:right;font-weight:bold;font-size:10.5pt;margin:4px 0;color:#000!important;}' +
+        '.t-conditions{font-size:5.5pt;text-align:justify;margin:5px 0 0 0;line-height:1.05;border-top:1pt solid #000;padding:4px 0 0 0;color:#000!important;font-weight:700;}' +
+        '.qr-container{text-align:center;margin:4px 0 1mm 0;padding:0;}' +
+        '.qr-img{width:50px;height:50px;object-fit:contain;margin:0;padding:0;display:inline-block;}' +
+        '</style>';
+
+      iframeDoc.write('<html><head>' + printStyles + '</head><body>');
+      iframeDoc.write('<div class="ticket-papel">' + document.getElementById('area-print').innerHTML + '</div>');
+      iframeDoc.write('</body></html>');
+      iframeDoc.close();
+
+      iframe.onload = function() {
+        setTimeout(function() {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+          setTimeout(function() { document.body.removeChild(iframe); }, 1000);
+        }, 250);
+      };
+    }
+
+    // Animación de spinner en CSS (para el botón guardar)
+    const spinStyle = document.createElement('style');
+    spinStyle.textContent = '@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
+    document.head.appendChild(spinStyle);
+
+    // ═══════════════════════════════════════════
+    //  ESTADO ADMIN (PIN compartido — Balance + Datos)
+    // ═══════════════════════════════════════════
+    var _adminDesbloqueado = false;
+
+    // Datos: accesible para todos — solo columnas financieras bloqueadas
+    function abrirDatos(menuEl) {
+      ir('datos', menuEl);
+      cargarDatos();
+    }
+
+    // validarPin unificado: desbloquea TODO cuando el admin ingresa PIN
+    function validarPin() {
+      const pin = document.getElementById('pinInput').value;
+      if (!pin) { alert('⚠️ Ingresa el PIN'); return; }
+      if (String(pin) === PIN_CORRECTO) {
+        _adminDesbloqueado = true;
+        document.getElementById('modalPin').style.display = 'none';
+        document.getElementById('pinInput').value = '';
+        // Desbloquear stats de Balance
+        document.getElementById('st-c').classList.remove('blur');
+        if (document.getElementById('st-n')) document.getElementById('st-n').classList.remove('blur');
+        if (document.getElementById('st-u')) document.getElementById('st-u').classList.remove('blur');
+        document.getElementById('l1').style.display = 'none';
+        document.getElementById('l2').style.display = 'none';
+        // Desbloquear banner de Datos si está visible
+        var bannerLock = document.getElementById('banner-datos-lock');
+        if (bannerLock) bannerLock.style.display = 'none';
+        var bannerUnlock = document.getElementById('banner-datos-unlock');
+        if (bannerUnlock) bannerUnlock.style.display = 'flex';
+        // Re-renderizar tabla si ya había datos cargados
+        if (window._datosRowsCache) renderDatos(window._datosRowsCache);
+      } else {
+        alert('❌ PIN Incorrecto');
+        document.getElementById('pinInput').value = '';
+      }
+    }
+
+    function ocultarMontos() {
+      _adminDesbloqueado = false;
+      var bannerLock = document.getElementById('banner-datos-lock');
+      if (bannerLock) bannerLock.style.display = 'flex';
+      var bannerUnlock = document.getElementById('banner-datos-unlock');
+      if (bannerUnlock) bannerUnlock.style.display = 'none';
+      
+      // Volver a bloquear stats de Balance
+      var stc = document.getElementById('st-c'); if (stc) stc.classList.add('blur');
+      var stn = document.getElementById('st-n'); if (stn) stn.classList.add('blur');
+      var stu = document.getElementById('st-u'); if (stu) stu.classList.add('blur');
+      var l1 = document.getElementById('l1'); if (l1) l1.style.display = 'flex';
+      var l2 = document.getElementById('l2'); if (l2) l2.style.display = 'flex';
+
+      // Re-renderizar para aplicar el blur de nuevo
+      if (window._datosRowsCache) renderDatos(window._datosRowsCache);
+    }
+
+    async function cargarDatos() {
+      document.getElementById('lista-datos').innerHTML =
+        '<tr><td colspan="20" style="padding:40px;text-align:center;color:var(--texto-gris);">Cargando...</td></tr>';
+      try {
+        var { data, error } = await _supa
+          .from('ventas')
+          .select('*')
+          .order('correlativo', { ascending: true })
+          .order('id', { ascending: true });
+        if (error) throw error;
+        window._datosRowsCache = data || [];
+        renderDatos(window._datosRowsCache);
+      } catch(err) {
+        document.getElementById('lista-datos').innerHTML =
+          '<tr><td colspan="20" style="padding:40px;text-align:center;color:#ef4444;">❌ Error: ' + (err.message||'') + '</td></tr>';
+      }
+    }
+
+    function renderDatos(rows) {
+      if (!rows || rows.length === 0) {
+        document.getElementById('lista-datos').innerHTML =
+          '<tr><td colspan="20" style="padding:40px;text-align:center;color:var(--texto-gris);">No hay registros</td></tr>';
+        return;
+      }
+
+      // Ordenar por fecha cronológicamente (más antiguo primero) para agrupar bien los meses (Antiguos a más recientes)
+      var sortedRows = rows.slice().sort(function(a, b) {
+        var d1 = _parseFecha(a.fecha) || new Date(0);
+        var d2 = _parseFecha(b.fecha) || new Date(0);
+        if (d1.getTime() === d2.getTime()) return (a.correlativo||0) - (b.correlativo||0); // Stable sort fallback
+        return d1 - d2;
+      });
+
+      // Banner de bloqueo para montos admin
+      var bannerDatos = document.getElementById('banner-datos-lock');
+      if (bannerDatos) bannerDatos.style.display = _adminDesbloqueado ? 'none' : 'flex';
+
+      var OCULTO = '<span style="filter:blur(4px);user-select:none;letter-spacing:2px;">●●●●●</span>';
+      var td = function(val, align) {
+        return '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;text-align:' + (align||'left') + ';" title="' + String(val||'').replace(/<[^>]*>/g,'') + '">' + (val||'—') + '</td>';
+      };
+      var tdTextWrap = function(val) {
+        return '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;white-space:normal;word-break:break-word;min-width:150px;text-align:left;">' + (val||'—') + '</td>';
+      };
+      var tdFecha = function(val, color) {
+        return '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;white-space:nowrap;' + color + '">' + (val||'—') + '</td>';
+      };
+      // Contar repeticiones de la misma reserva (numero_doc)
+      var countMap = {};
+      sortedRows.forEach(function(r) {
+        var nd = r.numero_doc || 'SIN_DOC';
+        countMap[nd] = (countMap[nd] || 0) + 1;
+      });
+      // Agrupación por mes
+      var MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var ultimoMes = null;
+      var html = sortedRows.map(function(r) {
+        var fechaDoc = _parseFecha(r.fecha);
+        var mesActual = fechaDoc ? fechaDoc.getMonth() : -1;
+        var anioActual = fechaDoc ? fechaDoc.getFullYear() : 0;
+        var grupoMes = '';
+        if (ultimoMes === null || ultimoMes.mes !== mesActual || ultimoMes.anio !== anioActual) {
+          grupoMes = '<tr style="background:#f0f9ff;"><td colspan="20" style="padding:8px 10px;font-weight:bold;font-size:13px;color:#0369a1;border-bottom:1px solid var(--borde);">' + MESES_ES[mesActual] + ' ' + anioActual + '</td></tr>';
+          ultimoMes = { mes: mesActual, anio: anioActual };
+        }
+
+        var hoy = new Date();
+        var calcColor = function(dateStr) {
+          if (!dateStr || dateStr === '---' || String(dateStr).trim() === '') return '';
+          var f = _parseFecha(dateStr);
+          if (!f) return '';
+          f.setHours(0,0,0,0);
+          var diff = Math.floor((f - hoy) / 86400000);
+          if (diff < 0)  return 'color:#10b981;font-weight:800;';
+          if (diff <= 2) return 'color:#ef4444;font-weight:800;background:#fee2e2;border-radius:4px;padding:0 4px;';
+          return '';
+        };
+        // Helper inline para formatear fecha ISO → DD/MM/YYYY
+        var fmtFecha = function(s) {
+          if (!s || s === '---') return '—';
+          s = String(s).trim();
+          if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { var p=s.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+          return s;
+        };
+        var nac = fmtFecha(r.fecha_nacimiento);
+        var fsal = fmtFecha(r.fecha_salida);
+        var fret = fmtFecha(r.fecha_retorno);
+
+        var nd = r.numero_doc || 'SIN_DOC';
+        var splitBy = countMap[nd] || 1;
+        var rComision = (parseFloat(r.comision) || 0) / splitBy;
+        var rNeto = (parseFloat(r.neto) || 0) / splitBy;
+        var rTotal = (parseFloat(r.total) || 0) / splitBy;
+
+        var comVal = _adminDesbloqueado ? ('$ ' + rComision.toFixed(2)) : OCULTO;
+        var netVal = _adminDesbloqueado ? ('$ ' + rNeto.toFixed(2))     : OCULTO;
+        var totVal = _adminDesbloqueado ? ('<b>$ ' + rTotal.toFixed(2) + '</b>') : OCULTO;
+
+        var colorSal = calcColor(r.fecha_salida);
+        var colorRet = calcColor(r.fecha_retorno);
+        var diffDiasRegistro = fechaDoc ? Math.floor((new Date() - fechaDoc) / 86400000) : 999;
+        var badgeNuevo = (diffDiasRegistro >= 0 && diffDiasRegistro <= 7) ? '<span style="display:inline-block;margin-left:6px;background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:800;vertical-align:middle;">NUEVO</span>' : '';
+
+        return grupoMes + '<tr>' +
+          td('<b>' + (r.numero_doc||'') + '</b>' + badgeNuevo) +
+          td(r.fecha||'') +
+          tdTextWrap(r.titular||'') +
+          tdTextWrap(r.pasajero||'') +
+          tdFecha(fsal, colorSal) +
+          tdFecha(fret, colorRet) +
+          td(r.ruta||'') +
+          td(r.dni_ruc||'') +
+          td(r.aerolinea||'') +
+          td(r.codigo_reserva||'') +
+          td(r.celular||'') +
+          td('<span style="font-size:10px;">' + (r.direccion||'').substring(0,30) + (r.direccion&&r.direccion.length>30?'...':'') + '</span>') +
+          td(r.tipo_emision||'') +
+          td(r.counter||'') +
+          td(r.metodo_pago||'') +
+          td(nac||'') +
+          td(comVal, 'right') +
+          td(netVal, 'right') +
+          td(totVal, 'right') +
+          td('$ ' + parseFloat(r.importe_individual||0).toFixed(2), 'right') +
+          '<td style="padding:8px;border-bottom:1px solid var(--borde);text-align:center;">' +
+          '<button onclick="abrirEditar(' + r.id + ')" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;margin-bottom:5px;">Editar</button>' +
+          '<br><label style="font-size:10px; cursor:pointer; color:#0369a1; font-weight:700; display:flex; align-items:center; justify-content:center; gap:4px;"><input type="checkbox" onclick="toggleVerificado(' + r.id + ', this.checked)" ' + (String(r.observacion||'').includes('[✓ REVISADO]') ? 'checked' : '') + '> OK</label>' +
+          '</td>' +
+          '<td id="obs_text_' + r.id + '" style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;min-width:120px;white-space:normal;word-break:break-word;">' +
+          '<span style="color:#0369a1;">' + (r.observacion || '<span style="color:#94a3b8;font-style:italic;">—</span>') + '</span>' +
+          '</td>' +
+          '</tr>';
+      }).join('');
+      document.getElementById('lista-datos').innerHTML = html;
+    }
+
+
+    // ═══════════════════════════════════════════
+    //  EDITAR REGISTRO → SUPABASE
+    // ═══════════════════════════════════════════
+    function abrirEditar(rowId) {
+      var pin = prompt('⚠️ Ingresa el PIN para editar:');
+      if (pin !== '1997') {
+        if (pin !== null) alert('❌ PIN Incorrecto');
+        return;
+      }
+
+      var rows = window._datosRowsCache || [];
+      var r = rows.find(function(x){ return x.id === rowId; });
+      if (!r) { alert('❌ Registro no encontrado en caché. Refresca la tabla primero.'); return; }
+
+      // Función para convertir fechas DD/MM/YYYY o cualquier formato a YYYY-MM-DD para el input type=date
+      function toInputDate(s) {
+        if (!s || s === '---') return '';
+        s = String(s).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s; // ya está en ISO
+        var m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (m) return m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
+        return '';
+      }
+
+      document.getElementById('edit_id').value         = r.id;
+      document.getElementById('edit_titular').value    = r.titular || '';
+      document.getElementById('edit_fecha_doc').value  = r.fecha || '';
+      document.getElementById('edit_dni').value        = r.dni_ruc || '';
+      document.getElementById('edit_pasajero').value   = r.pasajero || '';
+      document.getElementById('edit_celular').value    = r.celular || '';
+      document.getElementById('edit_ruta').value       = r.ruta || '';
+      document.getElementById('edit_aerolinea').value  = r.aerolinea || '';
+      document.getElementById('edit_reserva').value    = r.codigo_reserva || '';
+      document.getElementById('edit_metodo').value     = r.metodo_pago || '';
+      document.getElementById('edit_salida').value     = toInputDate(r.fecha_salida);
+      document.getElementById('edit_retorno').value    = toInputDate(r.fecha_retorno);
+      document.getElementById('edit_nacimiento').value = toInputDate(r.fecha_nacimiento);
+      document.getElementById('edit_comision').value   = r.comision || '';
+      document.getElementById('edit_neto').value       = r.neto || '';
+      document.getElementById('edit_total').value      = r.total || '';
+      document.getElementById('edit_importe').value    = r.importe_individual || '';
+      document.getElementById('edit_counter').value    = r.counter || '';
+      document.getElementById('edit_observacion').value = r.observacion || '';
+
+      document.getElementById('modalEditar').style.display = 'flex';
+    }
+
+    function cerrarEditar() {
+      document.getElementById('modalEditar').style.display = 'none';
+    }
+
+    async function guardarEdicion() {
+      var btn = document.getElementById('btnGuardarEdicion');
+      var rowId = parseInt(document.getElementById('edit_id').value);
+      if (!rowId) { alert('❌ Error: ID de registro no encontrado.'); return; }
+
+      btn.innerHTML = '⏳ Guardando...';
+      btn.disabled = true;
+
+      var updates = {
+        titular:          document.getElementById('edit_titular').value.toUpperCase(),
+        dni_ruc:          document.getElementById('edit_dni').value,
+        pasajero:         document.getElementById('edit_pasajero').value.toUpperCase(),
+        celular:          document.getElementById('edit_celular').value,
+        ruta:             document.getElementById('edit_ruta').value.toUpperCase(),
+        aerolinea:        document.getElementById('edit_aerolinea').value.toUpperCase(),
+        codigo_reserva:   document.getElementById('edit_reserva').value.toUpperCase(),
+        metodo_pago:      document.getElementById('edit_metodo').value,
+        fecha_salida:     document.getElementById('edit_salida').value || null,
+        fecha_retorno:    document.getElementById('edit_retorno').value || null,
+        fecha_nacimiento: document.getElementById('edit_nacimiento').value || null,
+        comision:         parseFloat(document.getElementById('edit_comision').value) || 0,
+        neto:             parseFloat(document.getElementById('edit_neto').value) || 0,
+        total:            parseFloat(document.getElementById('edit_total').value) || 0,
+        importe_individual: parseFloat(document.getElementById('edit_importe').value) || 0,
+        counter:          document.getElementById('edit_counter').value,
+        fecha:            document.getElementById('edit_fecha_doc').value || undefined,
+        observacion:      document.getElementById('edit_observacion').value || ''
+      };
+
+      try {
+        var { error } = await _supa.from('ventas').update(updates).eq('id', rowId);
+        if (error) throw error;
+
+        // Actualizar caché local
+        var rows = window._datosRowsCache || [];
+        var idx = rows.findIndex(function(x){ return x.id === rowId; });
+        if (idx !== -1) Object.assign(rows[idx], updates);
+
+        // Actualizar checkin toggle
+        var checkinActivo = document.getElementById('edit_checkin_activo').checked;
+        var fS = updates.fecha_salida || '';
+        var fR = updates.fecha_retorno || '';
+        var kS = (updates.titular||'') + '|SALIDA|' + fS;
+        var kR = (updates.titular||'') + '|RETORNO|' + fR;
+        var descList = JSON.parse(localStorage.getItem('killa_alertas_desc') || '[]');
+
+        if (checkinActivo) {
+          // Activar = QUITAR de descartados
+          descList = descList.filter(function(k) { return k !== kS && k !== kR; });
+        } else {
+          // Desactivar = AGREGAR a descartados
+          if (fS && !descList.includes(kS)) descList.push(kS);
+          if (fR && fR !== '---' && !descList.includes(kR)) descList.push(kR);
+        }
+        localStorage.setItem('killa_alertas_desc', JSON.stringify(descList));
+        window._alertasDescartadas = descList; // Actualizar variable global en JS
+
+        cerrarEditar();
+        alert('✅ Registro actualizado correctamente');
+        cargarAlertas(); // Recarga sección check-in
+        cargarDatos();   // Refresca la tabla desde la DB
+      } catch(err) {
+        alert('❌ Error al guardar: ' + (err.message || String(err)));
+      } finally {
+        btn.innerHTML = '💾 Guardar Cambios';
+        btn.disabled = false;
+      }
+    }
+
+    function exportarCSV() {
+      _supa.from('ventas').select('*').order('correlativo',{ascending:false}).order('id',{ascending:true})
+        .then(function(res) {
+          var rows = res.data || [];
+          if (!rows.length) { alert('No hay datos para exportar'); return; }
+          var headers = ['# Doc','Fecha','Comprador','DNI/RUC','Pasajero','Cod.Reserva','Aerolinea','Ruta','F.Salida','F.Retorno','Celular','Direccion','Tipo','Counter','Metodo Pago','F.Nacimiento','Comision','Neto','Cobrado','Importe Ind.'];
+          var csv = headers.join(',') + '\n';
+          rows.forEach(function(r) {
+            var nac = String(r.fecha_nacimiento||'').trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(nac)) { var p=nac.split('-'); nac=p[2]+'/'+p[1]+'/'+p[0]; }
+            var fsal = String(r.fecha_salida||'').trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(fsal)) { var p=fsal.split('-'); fsal=p[2]+'/'+p[1]+'/'+p[0]; }
+            var col = function(v) { return '"' + String(v||'').replace(/"/g,'""') + '"'; };
+            csv += [col(r.numero_doc),col(r.fecha),col(r.titular),col(r.dni_ruc),col(r.pasajero),col(r.codigo_reserva),col(r.aerolinea),col(r.ruta),col(fsal),col(r.fecha_retorno),col(r.celular),col(r.direccion),col(r.tipo_emision),col(r.counter),col(r.metodo_pago),col(nac),r.comision,r.neto,r.total,r.importe_individual].join(',') + '\n';
+          });
+          var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+          var url  = URL.createObjectURL(blob);
+          var a    = document.createElement('a');
+          a.href = url; a.download = 'KillaTravel_Datos_' + new Date().toISOString().slice(0,10) + '.csv';
+          a.click(); URL.revokeObjectURL(url);
+        });
+    }
+
+    // ═══════════════════════════════════════════
+    //  COLOR DE FECHAS (igual que Google Sheets)
+    // ═══════════════════════════════════════════
+    function _getDateColor(dateStr) {
+      if (!dateStr || dateStr === '---' || String(dateStr).trim() === '') return '';
+      var fecha = _parseFecha(dateStr);
+      if (!fecha) return '';
+      var hoy = new Date(); hoy.setHours(0,0,0,0);
+      fecha.setHours(0,0,0,0);
+      var diff = Math.floor((fecha - hoy) / 86400000);
+      if (diff < 0)  return 'color:#10b981;font-weight:700;';                                    // 🟢 verde – ya viajó
+      if (diff <= 2) return 'color:#ef4444;font-weight:800;background:#fee2e2;border-radius:4px;'; // 🔴 rojo – menos de 2 días
+      return ''; // normal
+    }
+
+    // ═══════════════════════════════════════════
+    //  PARSEAR TSV (copiado desde Google Sheets)
+    // ═══════════════════════════════════════════
+    function parseTSV(text) {
+      var rows = [], row = [], inQ = false, cell = '';
+      for (var i = 0; i < text.length; i++) {
+        var ch = text[i];
+        if (ch === '"') {
+          if (inQ && text[i+1] === '"') { cell += '"'; i++; } else inQ = !inQ;
+        } else if (ch === '\t' && !inQ) {
+          row.push(cell.trim()); cell = '';
+        } else if ((ch === '\n' || ch === '\r') && !inQ) {
+          if (ch === '\r' && text[i+1] === '\n') i++;
+          row.push(cell.trim());
+          if (row.some(function(c){return c.length>0;})) rows.push(row);
+          row = []; cell = '';
+        } else { cell += ch; }
+      }
+      if (cell || row.length > 0) { row.push(cell.trim()); if (row.some(function(c){return c.length>0;})) rows.push(row); }
+      return rows;
+    }
+
+    // ═══════════════════════════════════════════
+    //  ABRIR MODAL IMPORTAR
+    // ═══════════════════════════════════════════
+    function abrirImportar() {
+      document.getElementById('modalImportar').style.display = 'grid';
+      document.getElementById('import-textarea').value = '';
+      document.getElementById('import-progress').textContent = '';
+    }
+
+    // ═══════════════════════════════════════════
+    //  IMPORTAR DESDE GOOGLE SHEETS → SUPABASE
+    // ═══════════════════════════════════════════
+    async function importarDesdeSheet() {
+      var text = document.getElementById('import-textarea').value.trim();
+      if (!text) { alert('⚠️ Pega primero los datos'); return; }
+      var filas = [];
+      if (text.includes(' | ')) {
+        text.split('\n').forEach(function(line) {
+          if (!line.trim()) return;
+          var p = line.split('|').map(function(x) { return x.trim(); });
+          if (p.length >= 7) {
+            var arr = new Array(20).fill('');
+            arr[1] = p[1];
+            arr[2] = p[0];
+            arr[4] = p[0];
+            arr[7] = p[2];
+            var fdates = p[3] ? p[3].split('-') : [];
+            arr[8] = fdates[0] ? fdates[0].trim() : '';
+            arr[9] = fdates[1] ? fdates[1].trim() : '';
+            arr[10] = p[4] ? p[4].replace('📞', '').trim() : '';
+            arr[13] = p[5];
+            arr[14] = p[6];
+            var totStr = p[7] ? p[7].replace(/S\/\s*/, '').trim() : '0';
+            arr[15] = '0';
+            arr[16] = '0';
+            arr[17] = totStr;
+            filas.push(arr);
+          }
+        });
+      } else {
+        filas = parseTSV(text);
+      }
+      if (filas.length === 0) { alert('⚠️ No se encontraron filas'); return; }
+
+      var msgEl = document.getElementById('import-progress');
+      msgEl.style.color = '#7c3aed';
+      msgEl.textContent = '⏳ Obteniendo correlativo máximo...';
+
+      var { data: maxData } = await _supa.from('ventas').select('correlativo').order('correlativo', { ascending: false }).limit(1);
+      var nextCorr = (maxData && maxData[0] ? parseInt(maxData[0].correlativo) : 0) + 1;
+
+      var registros = [];
+      var lastTitular = '', lastFecha = '', lastCorr = 0, lastSerie = '001', lastNumDoc = '';
+
+      filas.forEach(function(cols) {
+        if (cols.length < 7) return;
+        var c = function(i) { return ((cols[i]||'').trim()).replace(/^["']|["']$/g,''); };
+
+        var rawDoc     = c(0);
+        var fecha      = c(1);
+        var titular    = c(2).toUpperCase();
+        var dniRuc     = c(3);
+        var pasajero   = c(4).toUpperCase() || titular;
+        var codRes     = c(5);
+        var aerolinea  = c(6);
+        var ruta       = c(7);
+        var fSalida    = c(8);
+        var rawRet     = c(9);
+        var fRetorno   = (rawRet === '---' || rawRet === '----') ? '' : rawRet;
+        var celular    = c(10);
+        var direccion  = c(11);
+        var tipoEmi    = c(12) || 'BOLETOS AÉREOS';
+        var counter    = c(13);
+        var metPago    = c(14);
+        var neto       = parseFloat(c(15)) || 0;
+        var comision   = parseFloat(c(16)) || 0;
+        var rawCob     = c(17);
+        var cobrado    = parseFloat(rawCob) || 0;
+        var fechaNac   = c(18);
+
+        if (!pasajero && !titular) return;                       // fila vacía
+        if (rawCob.toUpperCase() === 'TRUE') return;             // anulado explícito
+
+        var serie, correlativo, numeroDoc;
+        var mDoc = rawDoc.match(/^(\d{3})\s*[-–]\s*N[°o]?0*(\d+)/i);
+        if (mDoc) {
+          serie = mDoc[1]; correlativo = parseInt(mDoc[2]); numeroDoc = rawDoc;
+        } else if (!rawDoc) {
+          // Sin número de doc: agrupar por titular+fecha consecutivos
+          if (titular && titular === lastTitular && fecha === lastFecha && lastCorr > 0) {
+            serie = lastSerie; correlativo = lastCorr; numeroDoc = lastNumDoc;
+          } else {
+            serie = '001'; correlativo = nextCorr++;
+            numeroDoc = serie + ' - N°' + String(correlativo).padStart(6,'0');
+          }
+        } else {
+          serie = '001'; correlativo = nextCorr++;
+          numeroDoc = '001 - N°' + String(correlativo).padStart(6,'0');
+        }
+
+        lastTitular = titular; lastFecha = fecha;
+        lastCorr = correlativo; lastSerie = serie; lastNumDoc = numeroDoc;
+
+        registros.push({
+          numero_doc: numeroDoc, fecha: fecha,
+          titular: titular || '---', dni_ruc: dniRuc,
+          pasajero: pasajero, codigo_reserva: codRes,
+          aerolinea: aerolinea, ruta: ruta,
+          fecha_salida: fSalida, fecha_retorno: fRetorno,
+          celular: celular, direccion: direccion,
+          tipo_emision: tipoEmi, counter: counter, metodo_pago: metPago,
+          neto: neto, comision: comision, total: cobrado,
+          fecha_nacimiento: fechaNac, importe_individual: cobrado,
+          anulado: false, serie: serie, correlativo: correlativo
+        });
+      });
+
+      if (registros.length === 0) { msgEl.textContent = '⚠️ No se parseó ningún registro válido'; return; }
+
+      var insertados = 0, errores = 0, total = registros.length;
+      msgEl.textContent = '⏳ Importando 0 / ' + total + '...';
+
+      for (var i = 0; i < total; i += 50) {
+        var batch = registros.slice(i, Math.min(i+50, total));
+        msgEl.textContent = '⏳ Importando ' + Math.min(i+50, total) + ' / ' + total + '...';
+        try {
+          var res = await _supa.from('ventas').insert(batch);
+          if (res.error) { console.error(res.error); errores += batch.length; }
+          else insertados += batch.length;
+        } catch(e) { errores += batch.length; }
+      }
+
+      if (insertados > 0) {
+        msgEl.style.color = '#10b981';
+        msgEl.textContent = '✅ ' + insertados + ' registros importados correctamente' + (errores > 0 ? ' (' + errores + ' con error)' : '');
+        setTimeout(function() {
+          document.getElementById('modalImportar').style.display = 'none';
+          cargarDatos(); cargarDashboard();
+        }, 2500);
+      } else {
+        msgEl.style.color = '#ef4444';
+        msgEl.textContent = '❌ Error al importar. Revisa la consola. (' + errores + ' errores)';
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    //  SINCRONIZAR SCROLLBAR DOBLE (Datos)
+    // ═══════════════════════════════════════════
+    (function() {
+      function initDualScroll() {
+        var top  = document.getElementById('datos-scroll-top');
+        var main = document.getElementById('datos-scroll-main');
+        var inner = document.getElementById('datos-scroll-top-inner');
+        var tbl  = document.getElementById('datos-tabla');
+        if (!top || !main || !inner || !tbl) return;
+        // Fijar el ancho del inner al ancho real de la tabla
+        function syncWidth() {
+          inner.style.width = tbl.offsetWidth + 'px';
+        }
+        syncWidth();
+        // Resize observer para actualizar si la tabla cambia
+        if (window.ResizeObserver) {
+          new ResizeObserver(syncWidth).observe(tbl);
+        }
+        // Sincronizar scroll
+        var syncing = false;
+        top.addEventListener('scroll', function() {
+          if (syncing) return; syncing = true;
+          main.scrollLeft = top.scrollLeft;
+          syncing = false;
+        });
+        main.addEventListener('scroll', function() {
+          if (syncing) return; syncing = true;
+          top.scrollLeft = main.scrollLeft;
+          syncing = false;
+        });
+      }
+      // Intentar al cargar y también cuando se inicia la sección datos
+      window.addEventListener('load', function() { setTimeout(initDualScroll, 500); });
+      // Parche: re-init cada vez que se llama cargarDatos
+      var _origCargarDatos = window.cargarDatos;
+      if (typeof _origCargarDatos === 'function') {
+        window.cargarDatos = function() {
+          _origCargarDatos.apply(this, arguments);
+          setTimeout(initDualScroll, 800);
+        };
+      }
+    })();
+
+    // DUAL SCROLL BOLETOS
+    (function() {
+      function initBoletosDualScroll() {
+        var top = document.getElementById('boletos-scroll-top');
+        var main = document.getElementById('boletos-scroll-main');
+        var inner = document.getElementById('boletos-scroll-top-inner');
+        var tbl = document.getElementById('boletos-tabla');
+        if (!top || !main || !inner || !tbl) return;
+        function syncWidth() { inner.style.width = tbl.offsetWidth + 'px'; }
+        syncWidth();
+        if (window.ResizeObserver) new ResizeObserver(syncWidth).observe(tbl);
+        var syncing = false;
+        top.addEventListener('scroll', function() { if (syncing) return; syncing = true; main.scrollLeft = top.scrollLeft; syncing = false; });
+        main.addEventListener('scroll', function() { if (syncing) return; syncing = true; top.scrollLeft = main.scrollLeft; syncing = false; });
+      }
+      window.addEventListener('load', function() { setTimeout(initBoletosDualScroll, 700); });
+      document.addEventListener('click', function(e) { var el = e.target && e.target.closest ? e.target.closest('[onclick]') : null; if (el && el.getAttribute('onclick') && el.getAttribute('onclick').indexOf('boletos') !== -1) setTimeout(initBoletosDualScroll, 800); });
+    })();
+    async function toggleVerificado(rowId, isChecked) {
+      var rows = window._datosRowsCache || [];
+      var r = rows.find(function(x) { return x.id === rowId; });
+      if (!r) return;
+      
+      var obs = r.observacion || '';
+      if (isChecked) {
+        if (!obs.includes('[✓ REVISADO]')) {
+          obs = obs ? (obs + ' [✓ REVISADO]') : '[✓ REVISADO]';
+        }
+      } else {
+        obs = obs.replace(/\[✓ REVISADO\]/g, '').trim();
+      }
+      
+      try {
+        var { error } = await _supa.from('ventas').update({ observacion: obs }).eq('id', rowId);
+        if (error) throw error;
+        r.observacion = obs;
+        var obsCol = document.getElementById('obs_text_' + rowId);
+        if (obsCol) {
+          obsCol.innerHTML = '<span style="color:#0369a1;">' + (obs || '<span style="color:#94a3b8;font-style:italic;">—</span>') + '</span>';
+        }
+      } catch (err) {
+        alert('❌ Error al actualizar estado: ' + (err.message || String(err)));
+        cargarDatos();
+      }
+    }
+
+    // Filtrar por mes o fecha exacta en la tabla Base de Datos
+    function filtrarPorMes(evt) {
+      if (evt && evt.target.id === 'filtro-fecha') {
+        document.getElementById('filtro-mes').value = '';
+      } else if (evt && evt.target.id === 'filtro-mes') {
+        document.getElementById('filtro-fecha').value = '';
+      }
+
+      var dateInput = document.getElementById('filtro-fecha').value; // YYYY-MM-DD
+      var mes = parseInt(document.getElementById('filtro-mes').value) || 0;
+      var rows = window._datosRowsCache || [];
+      
+      if (!mes && !dateInput) { renderDatos(rows); return; }
+      
+      var filtrados = rows.filter(function(r) {
+        var f = r.fecha ? String(r.fecha).trim() : '';
+        
+        if (dateInput) {
+           var pts = dateInput.split('-'); // [y, m, d]
+           if(pts.length === 3) {
+             var exact1 = pts[2] + '/' + pts[1] + '/' + pts[0];
+             var exact2 = parseInt(pts[2],10) + '/' + parseInt(pts[1],10) + '/' + pts[0];
+             if (f === exact1 || f === exact2 || f === dateInput) return true;
+           }
+        }
+
+        if (mes) {
+          var mp = f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (mp && parseInt(mp[2], 10) === mes) return true;
+          var mi = f.match(/^(\d{4})-(\d{2})-\d{2}$/);
+          if (mi && parseInt(mi[2], 10) === mes) return true;
+        }
+        
+        return false;
+      });
+      renderDatos(filtrados);
+    }
+  </script>
+</body>
+</html>
