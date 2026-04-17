@@ -371,7 +371,8 @@
               <label>Counter</label>
               <select id="i_staff">
                 <option value="">Seleccionar...</option>
-                <option>Andrea Paredes</option>
+                <option>Gracia Paredes</option>
+                <option>Diana</option>
                 <option>Guissel Luna</option>
                 <option>Jonatan Rodríguez</option>
                 <option>Otro</option>
@@ -1196,14 +1197,26 @@
       document.getElementById('lista-alertas').innerHTML =
         '<tr><td colspan="4" style="padding:40px;text-align:center;color:var(--texto-gris);">Cargando alertas...</td></tr>';
       try {
-        if (db.length === 0) db = await _fetchVentas();
+        // BUGFIX: Siempre recargar datos frescos de Supabase para evitar
+        // que pasajeros próximos no aparezcan por cache desactualizado
+        db = await _fetchVentas();
         var hoy = new Date(); hoy.setHours(0,0,0,0);
         var alertas = [];
         db.filter(function(v){ return !v.anulado; }).forEach(function(v) {
           var cel = v.cel || '';
           
-          // SALIDA
-          var fSal = _parseFecha(v.fechaSalida);
+          // SALIDA — soporta yyyy-MM-dd, dd/MM/yyyy y dd-MM-yyyy
+          var fSalRaw = v.fechaSalida || '';
+          var fSal = _parseFecha(fSalRaw);
+          // Intentar parseo extra si el formato es dd/MM/yyyy o dd-MM-yyyy
+          if (!fSal && fSalRaw) {
+            var alt = fSalRaw.replace(/\//g, '-');
+            var parts = alt.split('-');
+            if (parts.length === 3 && parts[2].length === 4) {
+              fSal = new Date(+parts[2], +parts[1]-1, +parts[0]);
+              if (isNaN(fSal.getTime())) fSal = null;
+            }
+          }
           if (fSal) { 
             var f = new Date(fSal); f.setHours(0,0,0,0);
             var ds = Math.floor((f-hoy)/86400000); 
@@ -1211,35 +1224,45 @@
               var paxs = (v.pasajeros||[]).map(function(p){return p.nom||'';}).join(', ');
               alertas.push({ 
                 pasajero: paxs || v.titular, titular: v.titular, ruta: v.ruta, 
-                salida: v.fechaSalida, tipo: 'SALIDA', cel: cel, diasFaltan: ds, key: (v.titular||'')+'|SALIDA|'+(v.fechaSalida||'')
+                salida: fSalRaw, tipo: 'SALIDA', cel: cel, diasFaltan: ds, key: (v.titular||'')+'|SALIDA|'+fSalRaw
               }); 
             }
           }
           
-          // RETORNO
-          var fRet = _parseFecha(v.fechaRetorno);
-          if (fRet && v.fechaRetorno && v.fechaRetorno !== '---') { 
+          // RETORNO — mismo fix de parsing
+          var fRetRaw = v.fechaRetorno || '';
+          var fRet = _parseFecha(fRetRaw);
+          if (!fRet && fRetRaw && fRetRaw !== '---') {
+            var alt2 = fRetRaw.replace(/\//g, '-');
+            var parts2 = alt2.split('-');
+            if (parts2.length === 3 && parts2[2].length === 4) {
+              fRet = new Date(+parts2[2], +parts2[1]-1, +parts2[0]);
+              if (isNaN(fRet.getTime())) fRet = null;
+            }
+          }
+          if (fRet && fRetRaw && fRetRaw !== '---') { 
             var f2 = new Date(fRet); f2.setHours(0,0,0,0);
             var dr = Math.floor((f2-hoy)/86400000); 
             if (dr >= -1 && dr <= 2) {
               var paxs2 = (v.pasajeros||[]).map(function(p){return p.nom||'';}).join(', ');
               alertas.push({ 
                 pasajero: paxs2 || v.titular, titular: v.titular, ruta: v.ruta, 
-                salida: v.fechaRetorno, tipo: 'RETORNO', cel: cel, diasFaltan: dr, key: (v.titular||'')+'|RETORNO|'+(v.fechaRetorno||'')
+                salida: fRetRaw, tipo: 'RETORNO', cel: cel, diasFaltan: dr, key: (v.titular||'')+'|RETORNO|'+fRetRaw
               }); 
             }
           }
         });
-        // Ordenar: primero los más antiguos (negativos = verdes), luego los próximos
+        // Ordenar: primero los más antiguos (negativos), luego los próximos
         alertas.sort(function(a,b){ return a.diasFaltan - b.diasFaltan; });
         
-        // Guardar para la exportación global si es necesario
+        // Guardar para la exportación
         window._alertasExportables = alertas;
         
         renderAlertas(alertas);
       } catch(err) {
+        console.error('Error en cargarAlertas:', err);
         document.getElementById('lista-alertas').innerHTML =
-          '<tr><td colspan="4" style="padding:40px;text-align:center;color:#ef4444;">❌ Error al cargar alertas</td></tr>';
+          '<tr><td colspan="4" style="padding:40px;text-align:center;color:#ef4444;">❌ Error al cargar alertas: ' + (err.message||'') + '</td></tr>';
       }
     }
 
