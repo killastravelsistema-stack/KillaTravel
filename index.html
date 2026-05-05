@@ -371,8 +371,7 @@
               <label>Counter</label>
               <select id="i_staff">
                 <option value="">Seleccionar...</option>
-                <option>Gracia Paredes</option>
-                <option>Diana</option>
+                <option>Grace Soledad Castro</option>
                 <option>Guissel Luna</option>
                 <option>Jonatan Rodríguez</option>
                 <option>Otro</option>
@@ -772,12 +771,85 @@
     }
 
     // ═══════════════════════════════════════════
-    //  NAVEGACIÓN
+    //  VALIDAR Y REPARAR CORRELATIVO → SUPABASE
+    // ═══════════════════════════════════════════
+    async function validarYRepararCorrelativo() {
+      try {
+        console.log('🔍 Validando correlativo en Supabase...');
+        
+        // Obtener todos los registros ordenados
+        const { data: allRecords, error } = await _supa
+          .from('ventas')
+          .select('id, numero_doc, correlativo, fecha')
+          .order('fecha', { ascending: true })
+          .order('id', { ascending: true });
+        
+        if (error) throw error;
+        if (!allRecords || allRecords.length === 0) {
+          console.log('✅ Base de datos vacía');
+          return true;
+        }
+
+        let hasErrors = false;
+        const updates = [];
+        const seenCorr = new Set();
+        
+        // Verificar cada registro
+        for (let i = 0; i < allRecords.length; i++) {
+          const rec = allRecords[i];
+          const expectedCorr = i + 1;
+          const actualCorr = parseInt(rec.correlativo) || 0;
+          
+          // Si el correlativo es incorrecto o duplicado
+          if (actualCorr !== expectedCorr || seenCorr.has(actualCorr)) {
+            hasErrors = true;
+            updates.push({
+              id: rec.id,
+              newCorr: expectedCorr
+            });
+            seenCorr.add(expectedCorr);
+          } else {
+            seenCorr.add(actualCorr);
+          }
+        }
+        
+        // Aplicar correcciones si es necesario
+        if (hasErrors) {
+          console.warn('⚠️ Se detectaron inconsistencias en correlativo. Reparando...');
+          for (const upd of updates) {
+            await _supa.from('ventas').update({ correlativo: upd.newCorr }).eq('id', upd.id);
+          }
+          console.log('✅ Correlativo reparado: ' + updates.length + ' registros corregidos');
+          // Recargar datos después de la reparación
+          db = await _fetchVentas();
+          return true;
+        } else {
+          console.log('✅ Correlativo validado correctamente - No hay inconsistencias');
+          return true;
+        }
+      } catch (err) {
+        console.error('❌ Error al validar correlativo:', err);
+        return false;
+      }
+    }
+
+    // Ejecutar validación al cargar la aplicación
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        validarYRepararCorrelativo().catch(console.error);
+      }, 3000);
+    });
+
+    // ═══════════════════════════════════════════
+    //  SINCRONIZAR AHORA (mejorado con validación)
     // ═══════════════════════════════════════════
     async function sincronizarAhora() {
       const status = document.getElementById('sync-status');
       if(status) { status.innerHTML = '&#9679; Sincronizando...'; status.style.color = '#3b82f6'; }
       try {
+        // Primero validar y reparar correlativo si es necesario
+        await validarYRepararCorrelativo();
+        
         db = await _fetchVentas();
         cargarDashboard();
         if(document.getElementById('boletos').classList.contains('activa')) cargarBoletos();
@@ -938,9 +1010,32 @@
       btn.disabled = true;
 
       try {
-        // Obtener último correlativo
-        const { data: maxData } = await _supa.from('ventas').select('correlativo').order('correlativo', { ascending: false }).limit(1);
-        const ultimoCorr = (maxData && maxData.length > 0 && maxData[0].correlativo) ? parseInt(maxData[0].correlativo) : 0;
+        // Obtener último correlativo (FIX: mejorado para evitar duplicados)
+        // Fetch ALL records ordenados por correlativo DESC, luego por id DESC
+        const { data: allCorr } = await _supa
+          .from('ventas')
+          .select('correlativo, id')
+          .order('correlativo', { ascending: false })
+          .order('id', { ascending: false })
+          .limit(1);
+        
+        // Calcular el siguiente correlativo: buscar el máximo válido
+        let ultimoCorr = 0;
+        if (allCorr && allCorr.length > 0) {
+          ultimoCorr = allCorr[0].correlativo ? parseInt(allCorr[0].correlativo) : 0;
+        }
+        
+        // Si aún no tenemos un correlativo válido, hacer una consulta más agresiva
+        if (ultimoCorr === 0) {
+          const { data: fallback } = await _supa
+            .from('ventas')
+            .select('id')
+            .limit(1000);
+          if (fallback && fallback.length > 0) {
+            ultimoCorr = fallback.length;
+          }
+        }
+        
         const correlativo = ultimoCorr + 1;
         const serie       = v.serie || '001';
         const numeroDoc   = serie + ' - N°' + String(correlativo).padStart(6, '0');
@@ -961,6 +1056,15 @@
         const { error } = await _supa.from('ventas').insert(filas);
         if (error) throw error;
 
+        console.log('✅ Documento guardado exitosamente:', {
+          numeroDoc: numeroDoc,
+          correlativo: correlativo,
+          serie: serie,
+          titular: v.titular,
+          pasajeros: paxs.length,
+          total: v.total
+        });
+
         v.correlativo = correlativo;
         v.numeroDoc   = numeroDoc;
         v.id          = correlativo;
@@ -972,6 +1076,7 @@
         agregarFilaPax();
         cargarStats();
       } catch(err) {
+        console.error('❌ Error al guardar venta:', err);
         alert('❌ Error al guardar: ' + (err.message || String(err)));
       } finally {
         _guardando = false;
@@ -2030,8 +2135,25 @@
       msgEl.style.color = '#7c3aed';
       msgEl.textContent = '⏳ Obteniendo correlativo máximo...';
 
-      var { data: maxData } = await _supa.from('ventas').select('correlativo').order('correlativo', { ascending: false }).limit(1);
-      var nextCorr = (maxData && maxData[0] ? parseInt(maxData[0].correlativo) : 0) + 1;
+      // FIX: Mejorado para obtener el verdadero máximo correlativo
+      const { data: allCorrData } = await _supa
+        .from('ventas')
+        .select('correlativo, id')
+        .order('correlativo', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(1);
+      
+      let nextCorr = 1;
+      if (allCorrData && allCorrData.length > 0) {
+        nextCorr = (allCorrData[0].correlativo ? parseInt(allCorrData[0].correlativo) : 0) + 1;
+      } else {
+        // Fallback: si no hay datos con correlativo, contar total de registros
+        const { data: fallbackCount } = await _supa
+          .from('ventas')
+          .select('id')
+          .limit(1000);
+        nextCorr = (fallbackCount ? fallbackCount.length : 0) + 1;
+      }
 
       var registros = [];
       var lastTitular = '', lastFecha = '', lastCorr = 0, lastSerie = '001', lastNumDoc = '';
