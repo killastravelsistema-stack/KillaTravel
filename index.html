@@ -852,6 +852,7 @@
       <div class="menu-item" id="nav-alertas" onclick="ir('check', this)"><i data-lucide="bell-ring"></i><span>Alertas</span></div>
       <div class="menu-item" id="nav-pasajeros" onclick="ir('pax', this)"><i data-lucide="users"></i><span>Pasajeros</span></div>
       <div class="menu-item" id="nav-datos" onclick="abrirDatos(this)"><i data-lucide="database"></i><span>Base de Datos</span></div>
+      <div class="menu-item" id="nav-misventas" style="display:none;" onclick="ir('misventas', this)"><i data-lucide="layout-list"></i><span>Mis Ventas</span></div>
     </nav>
     <div class="sidebar-footer"><b>Admin:</b> Guissel Carla Luna Quispe</div>
   </aside>
@@ -889,9 +890,13 @@
 
     <!-- SECCIÓN BALANCE -->
     <section id="dash" class="seccion activa">
-      <h1 style="margin-bottom: 8px; font-weight: 700; color: var(--primario);">Panel de Balance</h1>
-      <p style="color:var(--texto-gris); font-size:13px; margin-bottom:20px;">Vista general de documentos y totales</p>
-
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+        <div>
+          <h1 style="margin-bottom:4px;font-weight:700;color:var(--primario);">Panel de Balance</h1>
+          <p style="color:var(--texto-gris);font-size:13px;">Vista general de documentos y totales</p>
+        </div>
+        <button id="btn-reporte-mensual" onclick="abrirReporteMensual()" style="display:none;background:var(--primario);color:white;border:none;padding:11px 22px;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;display:none;align-items:center;gap:8px;">&#128202; Reporte Mensual</button>
+      </div>
       <div class="grid-stats">
         <div class="stat-card"><span>Boletos</span>
           <h2 id="st-t">0</h2>
@@ -1307,6 +1312,78 @@
         </div>
       </div>
     </section>
+
+    <!-- SECCIÓN MIS VENTAS (counters) -->
+    <section id="misventas" class="seccion">
+      <div class="seccion-datos-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:15px;margin-bottom:10px;">
+        <div>
+          <h1 style="margin-bottom:4px;font-weight:700;color:var(--primario);">Mis Ventas</h1>
+          <p style="color:var(--texto-gris);font-size:13px;">Tus registros emitidos en el sistema</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input type="date" id="misventas-filtro-fecha" onchange="filtrarMisVentas(event)"
+            style="padding:8px 12px;border:2px solid var(--borde-notorio);border-radius:8px;font-size:13px;font-weight:600;background:#fff;color:#1e293b;outline:none;" title="Filtrar por fecha exacta">
+          <select id="misventas-filtro-mes" onchange="filtrarMisVentas(event)"
+            style="padding:10px 14px;border:2px solid var(--borde-notorio);border-radius:8px;font-size:13px;font-weight:600;background:#fff;color:#1e293b;outline:none;">
+            <option value="" selected>— Todos los meses —</option>
+            <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+            <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+            <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+            <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+          </select>
+          <button onclick="cargarMisVentas()" style="background:var(--acento);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px;"><i data-lucide="refresh-cw" size="16"></i> Actualizar</button>
+        </div>
+      </div>
+      <!-- Banner montos (reutiliza misma lógica que Base de Datos) -->
+      <div id="banner-misventas-lock" style="display:flex;align-items:center;gap:14px;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:12px;padding:14px 20px;margin-bottom:16px;flex-wrap:wrap;">
+        <span style="font-size:22px;">🔒</span>
+        <div style="flex:1;"><b style="color:#92400e;">Montos financieros ocultos</b><br>
+          <span style="font-size:12px;color:#78350f;">Ingresa el PIN de admin para revelar COMISIÓN, NETO, COBRADO e IMP.IND.</span></div>
+        <button onclick="abrirPin()" style="background:#f59e0b;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;">Ver montos (PIN)</button>
+      </div>
+      <div id="banner-misventas-unlock" style="display:none;align-items:center;gap:14px;background:#d1fae5;border:1.5px solid #10b981;border-radius:12px;padding:14px 20px;margin-bottom:16px;flex-wrap:wrap;">
+        <span style="font-size:22px;">🔓</span>
+        <div style="flex:1;"><b style="color:#065f46;">Montos visibles</b><br>
+          <span style="font-size:12px;color:#047857;">Estás viendo las columnas financieras. Pulsa para volver a ocultarlas.</span></div>
+        <button onclick="ocultarMontos()" style="background:#10b981;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;">🙈 Ocultar montos</button>
+      </div>
+      <div class="table-container" style="background:white;border-radius:16px;border:1px solid var(--borde);overflow:hidden;border-top:3px solid var(--acento);">
+        <div id="misventas-scroll-top" class="top-scroll-bar" style="overflow-x:auto;overflow-y:hidden;border-bottom:1px solid var(--borde);background:#f8fafc;">
+          <div id="misventas-scroll-top-inner" style="height:10px;"></div>
+        </div>
+        <div id="misventas-scroll-main" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <table id="misventas-tabla" style="width:100%;border-collapse:collapse;min-width:1500px;table-layout:fixed;">
+            <thead><tr>
+              <th style="width:120px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;"># DOC</th>
+              <th style="width:90px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">FECHA EMI.</th>
+              <th style="width:170px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">COMPRADOR</th>
+              <th style="width:170px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">PASAJERO</th>
+              <th style="width:95px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:#ef4444;text-transform:uppercase;white-space:nowrap;">✈ F. SALIDA</th>
+              <th style="width:95px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:#ef4444;text-transform:uppercase;white-space:nowrap;">↩ F. RETORNO</th>
+              <th style="width:120px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">RUTA</th>
+              <th style="width:90px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">DNI / RUC</th>
+              <th style="width:95px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">AEROLÍNEA</th>
+              <th style="width:95px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">CÓD.RESERVA</th>
+              <th style="width:90px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">CELULAR</th>
+              <th style="width:120px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">DIRECCIÓN</th>
+              <th style="width:100px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">TIPO</th>
+              <th style="width:105px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">MED.PAGO</th>
+              <th style="width:95px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">F. NACIM.</th>
+              <th style="width:85px;background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">COMIS.$</th>
+              <th style="width:85px;background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">NETO $</th>
+              <th style="width:85px;background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">COBRADO $</th>
+              <th style="width:85px;background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">IMP.IND.$</th>
+              <th style="width:90px;background:var(--fondo);padding:12px 10px;text-align:center;font-weight:700;font-size:10px;color:#10b981;text-transform:uppercase;white-space:nowrap;">EDITAR</th>
+              <th style="width:150px;background:var(--fondo);padding:12px 10px;text-align:left;font-weight:700;font-size:10px;color:#0369a1;text-transform:uppercase;white-space:nowrap;">OBSERVACIÓN</th>
+            </tr></thead>
+            <tbody id="lista-misventas">
+              <tr><td colspan="21" style="padding:40px;text-align:center;color:var(--texto-gris);">Carga tus ventas con el botón Actualizar</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- MODAL EDITAR REGISTRO -->
@@ -1697,11 +1774,10 @@
     }
 
     function ir(id, el) {
-      // CAMBIO 5: Bloquear secciones restringidas para counters
+      // Bloquear secciones restringidas para counters
       var usuario = window._usuarioActivo || {};
-      var seccionesCounter = ['emi', 'boletos', 'check'];
+      var seccionesCounter = ['emi', 'boletos', 'check', 'misventas'];
       if (usuario.rol === 'counter' && seccionesCounter.indexOf(id) === -1) {
-        // Redirigir a Emitir si intenta ir a una sección restringida
         id = 'emi';
         el = document.getElementById('nav-emitir');
       }
@@ -1715,6 +1791,7 @@
       if (id === 'check') cargarAlertas();
       if (id === 'pax') cargarPasajeros();
       if (id === 'datos') cargarDatos();
+      if (id === 'misventas') cargarMisVentas();
       if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
@@ -1730,6 +1807,7 @@
       const pin = document.getElementById('pinInput').value;
       if (!pin) { alert('⚠️ Ingresa el PIN'); return; }
       if (String(pin) === PIN_CORRECTO) {
+        _adminDesbloqueado = true;
         document.getElementById('st-c').classList.remove('blur');
         if (document.getElementById('st-n')) document.getElementById('st-n').classList.remove('blur');
         if (document.getElementById('st-u')) document.getElementById('st-u').classList.remove('blur');
@@ -1737,6 +1815,13 @@
         document.getElementById('l2').style.display = 'none';
         document.getElementById('modalPin').style.display = 'none';
         document.getElementById('pinInput').value = '';
+        // Actualizar banners de Mis Ventas
+        var bl = document.getElementById('banner-datos-lock'); if (bl) bl.style.display = 'none';
+        var bu = document.getElementById('banner-datos-unlock'); if (bu) bu.style.display = 'flex';
+        var ml = document.getElementById('banner-misventas-lock'); if (ml) ml.style.display = 'none';
+        var mu = document.getElementById('banner-misventas-unlock'); if (mu) mu.style.display = 'flex';
+        // Re-renderizar Mis Ventas si hay datos cargados
+        if (window._misVentasCache) renderMisVentas(window._misVentasCache);
       } else {
         alert('❌ PIN Incorrecto');
         document.getElementById('pinInput').value = '';
@@ -1871,6 +1956,24 @@
             serie: serie, correlativo: correlativo
           };
         });
+
+        // Validación de totales antes de guardar
+        var sumaPax = paxs.reduce(function(acc, p) { return acc + (parseFloat(p.pre) || 0); }, 0);
+        var totalIngresado = parseFloat(v.total) || 0;
+        if (Math.abs(sumaPax - totalIngresado) > 0.01) {
+          var confirmarTotal = confirm(
+            '⚠️ ADVERTENCIA DE TOTAL\n\n' +
+            'Suma de pasajeros: $ ' + sumaPax.toFixed(2) + '\n' +
+            'Total registrado:  $ ' + totalIngresado.toFixed(2) + '\n\n' +
+            '¿Los montos no coinciden. Deseas continuar de todas formas?'
+          );
+          if (!confirmarTotal) {
+            _guardando = false;
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+            return;
+          }
+        }
 
         const { error } = await _supa.from('ventas').insert(filas);
         if (error) throw error;
@@ -2821,8 +2924,32 @@
         importe_individual: parseFloat(document.getElementById('edit_importe').value) || 0,
         counter: document.getElementById('edit_counter').value,
         fecha: document.getElementById('edit_fecha_doc').value || undefined,
-        observacion: document.getElementById('edit_observacion').value || ''
+        observacion: document.getElementById('edit_observacion').value || '',
+        ultima_edicion: new Date().toLocaleDateString('es-PE') + ' — ' + ((window._usuarioActivo && window._usuarioActivo.nombre) || 'Sistema')
       };
+
+      // Confirmación si admin modifica montos financieros
+      var _ue = window._usuarioActivo || {};
+      if (_ue.rol === 'admin') {
+        var rows0 = window._datosRowsCache || [];
+        var rOrig = rows0.find(function(x) { return x.id === rowId; }) || {};
+        var cambioFinanciero = (
+          updates.comision !== (parseFloat(rOrig.comision) || 0) ||
+          updates.neto !== (parseFloat(rOrig.neto) || 0) ||
+          updates.total !== (parseFloat(rOrig.total) || 0) ||
+          updates.importe_individual !== (parseFloat(rOrig.importe_individual) || 0)
+        );
+        if (cambioFinanciero) {
+          var cfirm = confirm(
+            '⚠️ Estás modificando montos financieros.\n\n' +
+            'Comisión: $ ' + updates.comision + '\n' +
+            'Neto: $ ' + updates.neto + '\n' +
+            'Total: $ ' + updates.total + '\n\n' +
+            '¿Confirmas los nuevos montos?'
+          );
+          if (!cfirm) { btn.innerHTML = '💾 Guardar Cambios'; btn.disabled = false; return; }
+        }
+      }
 
       try {
         var { error } = await _supa.from('ventas').update(updates).eq('id', rowId);
@@ -2854,8 +2981,11 @@
 
         cerrarEditar();
         alert('✅ Registro actualizado correctamente');
-        cargarAlertas(); // Recarga sección check-in
-        cargarDatos();   // Refresca la tabla desde la DB
+        cargarAlertas();
+        // Recargar sección según rol activo
+        var _usuAct = window._usuarioActivo || {};
+        if (_usuAct.rol === 'counter') { cargarMisVentas(); }
+        else { cargarDatos(); }
       } catch (err) {
         alert('❌ Error al guardar: ' + (err.message || String(err)));
       } finally {
@@ -3215,6 +3345,267 @@
     }
 
     // ═════════════════════════════════════════════
+    //  MIS VENTAS: cargar, render, editar, filtrar
+    // ═════════════════════════════════════════════
+    async function cargarMisVentas() {
+      var lista = document.getElementById('lista-misventas');
+      if (!lista) return;
+      lista.innerHTML = '<tr><td colspan="21" style="padding:40px;text-align:center;color:var(--texto-gris);">Cargando...</td></tr>';
+      var usuario = window._usuarioActivo || {};
+      if (!usuario.nombre) {
+        lista.innerHTML = '<tr><td colspan="21" style="padding:40px;text-align:center;color:#ef4444;">No hay sesión activa.</td></tr>';
+        return;
+      }
+      try {
+        const { data, error } = await _supa
+          .from('ventas')
+          .select('*')
+          .eq('counter', usuario.nombre)
+          .order('correlativo', { ascending: false })
+          .order('id', { ascending: false });
+        if (error) throw error;
+        window._misVentasCache = data || [];
+        renderMisVentas(window._misVentasCache);
+      } catch (err) {
+        lista.innerHTML = '<tr><td colspan="21" style="padding:40px;text-align:center;color:#ef4444;">❌ Error: ' + (err.message || '') + '</td></tr>';
+      }
+    }
+
+    function renderMisVentas(rows) {
+      var lista = document.getElementById('lista-misventas');
+      if (!lista) return;
+
+      // Actualizar banners de montos
+      var ml = document.getElementById('banner-misventas-lock');
+      var mu = document.getElementById('banner-misventas-unlock');
+      if (ml) ml.style.display = _adminDesbloqueado ? 'none' : 'flex';
+      if (mu) mu.style.display = _adminDesbloqueado ? 'flex' : 'none';
+
+      if (!rows || rows.length === 0) {
+        lista.innerHTML = '<tr><td colspan="21" style="padding:40px;text-align:center;color:var(--texto-gris);">No hay registros</td></tr>';
+        return;
+      }
+
+      var OCULTO = '<span style="filter:blur(4px);user-select:none;letter-spacing:2px;">●●●●●</span>';
+      var MESES_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var ultimoMes = null;
+      var hoy = new Date();
+
+      // Ordenar: más antiguos primero (para agrupar por mes correctamente)
+      var sortedRows = rows.slice().sort(function(a, b) {
+        var d1 = _parseFecha(a.fecha) || new Date(0);
+        var d2 = _parseFecha(b.fecha) || new Date(0);
+        if (d1.getTime() === d2.getTime()) return (a.correlativo || 0) - (b.correlativo || 0);
+        return d1 - d2;
+      });
+
+      var td = function(val, align) {
+        return '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;text-align:' + (align||'left') + ';" title="' + String(val||'').replace(/<[^>]*>/g,'') + '">' + (val||'—') + '</td>';
+      };
+      var tdTextWrap = function(val) {
+        return '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;white-space:normal;word-break:break-word;min-width:150px;text-align:left;">' + (val||'—') + '</td>';
+      };
+      var tdFecha = function(val, color) {
+        return '<td style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;white-space:nowrap;' + color + '">' + (val||'—') + '</td>';
+      };
+      var calcColor = function(dateStr) {
+        if (!dateStr || dateStr === '---' || String(dateStr).trim() === '') return '';
+        var f = _parseFecha(dateStr); if (!f) return '';
+        f.setHours(0,0,0,0);
+        var diff = Math.floor((f - hoy) / 86400000);
+        if (diff < 0) return 'color:#10b981;font-weight:800;';
+        if (diff <= 2) return 'color:#ef4444;font-weight:800;background:#fee2e2;border-radius:4px;padding:0 4px;';
+        return '';
+      };
+      var fmtFecha = function(s) {
+        if (!s || s === '---') return '—';
+        s = String(s).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { var p = s.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+        return s;
+      };
+
+      // Contar repeticiones por numero_doc para dividir comision/neto/total
+      var countMap = {};
+      sortedRows.forEach(function(r) {
+        var nd = r.numero_doc || 'SIN_DOC';
+        countMap[nd] = (countMap[nd] || 0) + 1;
+      });
+
+      var html = sortedRows.map(function(r) {
+        var fechaDoc = _parseFecha(r.fecha);
+        var mesActual = fechaDoc ? fechaDoc.getMonth() : -1;
+        var anioActual = fechaDoc ? fechaDoc.getFullYear() : 0;
+        var grupoMes = '';
+        if (ultimoMes === null || ultimoMes.mes !== mesActual || ultimoMes.anio !== anioActual) {
+          grupoMes = '<tr style="background:#f0f9ff;"><td colspan="21" style="padding:8px 10px;font-weight:bold;font-size:13px;color:#0369a1;border-bottom:1px solid var(--borde);">' + MESES_ES[mesActual] + ' ' + anioActual + '</td></tr>';
+          ultimoMes = { mes: mesActual, anio: anioActual };
+        }
+
+        var nd = r.numero_doc || 'SIN_DOC';
+        var splitBy = countMap[nd] || 1;
+        var rComision = (parseFloat(r.comision)||0) / splitBy;
+        var rNeto = (parseFloat(r.neto)||0) / splitBy;
+        var rTotal = (parseFloat(r.total)||0) / splitBy;
+        var comVal = _adminDesbloqueado ? ('$ ' + rComision.toFixed(2)) : OCULTO;
+        var netVal = _adminDesbloqueado ? ('$ ' + rNeto.toFixed(2)) : OCULTO;
+        var totVal = _adminDesbloqueado ? ('<b>$ ' + rTotal.toFixed(2) + '</b>') : OCULTO;
+        var impVal = _adminDesbloqueado ? ('$ ' + parseFloat(r.importe_individual||0).toFixed(2)) : OCULTO;
+
+        var fsal = fmtFecha(r.fecha_salida);
+        var fret = fmtFecha(r.fecha_retorno);
+        var nac = fmtFecha(r.fecha_nacimiento);
+        var colorSal = calcColor(r.fecha_salida);
+        var colorRet = calcColor(r.fecha_retorno);
+        var diffDias = fechaDoc ? Math.floor((new Date() - fechaDoc) / 86400000) : 999;
+        var badgeNuevo = (diffDias >= 0 && diffDias <= 7) ? '<span style="display:inline-block;margin-left:6px;background:#10b981;color:white;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:800;vertical-align:middle;">NUEVO</span>' : '';
+
+        return grupoMes + '<tr>' +
+          td('<b>' + (r.numero_doc||'') + '</b>' + badgeNuevo) +
+          td(r.fecha||'') +
+          tdTextWrap(r.titular||'') +
+          tdTextWrap(r.pasajero||'') +
+          tdFecha(fsal, colorSal) +
+          tdFecha(fret, colorRet) +
+          td(r.ruta||'') +
+          td(r.dni_ruc||'') +
+          td(r.aerolinea||'') +
+          td(r.codigo_reserva||'') +
+          td(r.celular||'') +
+          td('<span style="font-size:10px;">' + (r.direccion||'').substring(0,30) + (r.direccion && r.direccion.length > 30 ? '...' : '') + '</span>') +
+          td(r.tipo_emision||'') +
+          td(r.metodo_pago||'') +
+          td(nac||'') +
+          td(comVal, 'right') +
+          td(netVal, 'right') +
+          td(totVal, 'right') +
+          td(impVal, 'right') +
+          '<td style="padding:8px;border-bottom:1px solid var(--borde);text-align:center;">' +
+          '<button onclick="abrirEditarCounter(' + r.id + ')" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;margin-bottom:5px;">Editar</button>' +
+          '<br><label style="font-size:10px;cursor:pointer;color:#0369a1;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px;"><input type="checkbox" onclick="toggleVerificado(' + r.id + ', this.checked)" ' + (String(r.observacion||'').includes('[✓ REVISADO]') ? 'checked' : '') + '> OK</label>' +
+          '</td>' +
+          '<td id="obs_text_' + r.id + '_mv" style="padding:10px;border-bottom:1px solid var(--borde);font-size:12px;min-width:120px;white-space:normal;word-break:break-word;">' +
+          '<span style="color:#0369a1;">' + (r.observacion || '<span style="color:#94a3b8;font-style:italic;">—</span>') + '</span>' +
+          '</td></tr>';
+      }).join('');
+
+      lista.innerHTML = html;
+
+      // Sincronizar scroll dual
+      setTimeout(function() {
+        var top = document.getElementById('misventas-scroll-top');
+        var main = document.getElementById('misventas-scroll-main');
+        var inner = document.getElementById('misventas-scroll-top-inner');
+        var tbl = document.getElementById('misventas-tabla');
+        if (!top || !main || !inner || !tbl) return;
+        inner.style.width = tbl.offsetWidth + 'px';
+        var syncing = false;
+        top.onscroll = function() { if (syncing) return; syncing=true; main.scrollLeft=top.scrollLeft; syncing=false; };
+        main.onscroll = function() { if (syncing) return; syncing=true; top.scrollLeft=main.scrollLeft; syncing=false; };
+      }, 300);
+    }
+
+    function abrirEditarCounter(rowId) {
+      var usuario = window._usuarioActivo || {};
+      var config = _USUARIOS_CONFIG[usuario.nombre];
+      if (!config) { alert('❌ Sesión no válida'); return; }
+      var pin = prompt('⚠️ Ingresa tu PIN para editar:');
+      if (pin === null) return;
+      if (String(pin) !== config.pin) {
+        alert('❌ PIN incorrecto');
+        return;
+      }
+      var rows = window._misVentasCache || [];
+      var r = rows.find(function(x) { return x.id === rowId; });
+      if (!r) { alert('❌ Registro no encontrado. Recarga Mis Ventas.'); return; }
+
+      function toInputDate(s) {
+        if (!s || s === '---') return '';
+        s = String(s).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        var m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (m) return m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
+        return '';
+      }
+
+      document.getElementById('edit_id').value = r.id;
+      document.getElementById('edit_titular').value = r.titular || '';
+      document.getElementById('edit_fecha_doc').value = r.fecha || '';
+      document.getElementById('edit_dni').value = r.dni_ruc || '';
+      document.getElementById('edit_pasajero').value = r.pasajero || '';
+      document.getElementById('edit_celular').value = r.celular || '';
+      document.getElementById('edit_ruta').value = r.ruta || '';
+      document.getElementById('edit_aerolinea').value = r.aerolinea || '';
+      document.getElementById('edit_reserva').value = r.codigo_reserva || '';
+      document.getElementById('edit_metodo').value = r.metodo_pago || '';
+      document.getElementById('edit_salida').value = toInputDate(r.fecha_salida);
+      document.getElementById('edit_retorno').value = toInputDate(r.fecha_retorno);
+      document.getElementById('edit_nacimiento').value = toInputDate(r.fecha_nacimiento);
+      document.getElementById('edit_comision').value = r.comision || '';
+      document.getElementById('edit_neto').value = r.neto || '';
+      document.getElementById('edit_total').value = r.total || '';
+      document.getElementById('edit_importe').value = r.importe_individual || '';
+      document.getElementById('edit_counter').value = r.counter || '';
+      document.getElementById('edit_observacion').value = r.observacion || '';
+
+      // Desactivar campos financieros para counter
+      var bgLocked = '#f1f5f9';
+      ['edit_comision','edit_neto','edit_total','edit_importe'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.disabled = true; el.style.background = bgLocked; }
+      });
+      // Habilitar todos los demás campos
+      ['edit_titular','edit_fecha_doc','edit_dni','edit_pasajero','edit_celular',
+       'edit_ruta','edit_aerolinea','edit_reserva','edit_metodo','edit_salida',
+       'edit_retorno','edit_nacimiento','edit_counter','edit_observacion'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.disabled = false; el.style.background = ''; }
+      });
+
+      document.getElementById('modalEditar').style.display = 'flex';
+    }
+
+    function filtrarMisVentas(evt) {
+      if (evt && evt.target.id === 'misventas-filtro-fecha') {
+        document.getElementById('misventas-filtro-mes').value = '';
+      } else if (evt && evt.target.id === 'misventas-filtro-mes') {
+        document.getElementById('misventas-filtro-fecha').value = '';
+      }
+      var dateInput = document.getElementById('misventas-filtro-fecha').value;
+      var mes = parseInt(document.getElementById('misventas-filtro-mes').value) || 0;
+      var rows = window._misVentasCache || [];
+      if (!mes && !dateInput) { renderMisVentas(rows); return; }
+      var filtrados = rows.filter(function(r) {
+        var f = r.fecha ? String(r.fecha).trim() : '';
+        if (dateInput) {
+          var pts = dateInput.split('-');
+          if (pts.length === 3) {
+            var e1 = pts[2]+'/'+pts[1]+'/'+pts[0];
+            var e2 = parseInt(pts[2],10)+'/'+parseInt(pts[1],10)+'/'+pts[0];
+            if (f === e1 || f === e2 || f === dateInput) return true;
+          }
+        }
+        if (mes) {
+          var mp = f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (mp && parseInt(mp[2],10) === mes) return true;
+          var mi = f.match(/^(\d{4})-(\d{2})-\d{2}$/);
+          if (mi && parseInt(mi[2],10) === mes) return true;
+        }
+        return false;
+      });
+      renderMisVentas(filtrados);
+    }
+
+    // ocultarMontos también afecta Mis Ventas
+    var _origOcultarMontos = window.ocultarMontos;
+    window.ocultarMontos = function() {
+      _adminDesbloqueado = false;
+      if (typeof _origOcultarMontos === 'function') _origOcultarMontos();
+      var ml = document.getElementById('banner-misventas-lock'); if (ml) ml.style.display = 'flex';
+      var mu = document.getElementById('banner-misventas-unlock'); if (mu) mu.style.display = 'none';
+      if (window._misVentasCache) renderMisVentas(window._misVentasCache);
+    };
+
+    // ═════════════════════════════════════════════
     //  CAMBIO 4+5+6: LOGIN, PERMISOS Y SESIÓN
     // ═════════════════════════════════════════════
     var _USUARIOS_CONFIG = {
@@ -3291,12 +3682,148 @@
     }
 
     function aplicarPermisosRol(rol) {
-      // Secciones visibles para counter: solo Emitir, Boletos, Alertas
       var soloAdmin = ['nav-balance', 'nav-pasajeros', 'nav-datos'];
       soloAdmin.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = (rol === 'counter') ? 'none' : '';
       });
+      // nav-misventas: visible solo para counters
+      var mv = document.getElementById('nav-misventas');
+      if (mv) mv.style.display = (rol === 'counter') ? '' : 'none';
+      // btn-reporte-mensual: solo admin
+      var brm = document.getElementById('btn-reporte-mensual');
+      if (brm) brm.style.display = (rol === 'admin') ? 'flex' : 'none';
+    }
+
+    // ═════════════════════════════════════════════
+    //  REPORTE MENSUAL (solo admin)
+    // ═════════════════════════════════════════════
+    var _reporteCache = null; // guarda docs únicos del mes actual
+    var _reporteMesNombre = '';
+    var MESES_REPORTE = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+    function abrirReporteMensual() {
+      document.getElementById('modalReporteMensual').style.display = 'grid';
+      var hoy = new Date();
+      document.getElementById('rep-mes').value = hoy.getMonth() + 1;
+      document.getElementById('rep-anio').value = hoy.getFullYear();
+      generarReporte();
+    }
+
+    function cerrarReporteMensual() {
+      document.getElementById('modalReporteMensual').style.display = 'none';
+    }
+
+    async function generarReporte() {
+      var mes = parseInt(document.getElementById('rep-mes').value);
+      var anio = parseInt(document.getElementById('rep-anio').value);
+      var cont = document.getElementById('reporte-contenido');
+      cont.innerHTML = '<p style="color:var(--texto-gris);padding:30px;text-align:center;">Cargando datos...</p>';
+      _reporteMesNombre = MESES_REPORTE[mes - 1] + ' ' + anio;
+
+      try {
+        var { data, error } = await _supa.from('ventas').select('*').eq('anulado', false).order('correlativo', { ascending: true });
+        if (error) throw error;
+        var rows = data || [];
+
+        // Filtrar por mes/año usando _parseFecha
+        var delMes = rows.filter(function(r) {
+          var f = _parseFecha(r.fecha);
+          return f && f.getMonth() + 1 === mes && f.getFullYear() === anio;
+        });
+
+        // Agrupar por numero_doc + titular (igual que _fetchVentas)
+        var docMap = {};
+        delMes.forEach(function(r) {
+          var key = (r.numero_doc || 'SIN') + '§§' + (r.titular || '');
+          if (!docMap[key]) {
+            docMap[key] = { fecha: r.fecha, numDoc: r.numero_doc, titular: r.titular,
+              ruta: r.ruta, counter: r.counter, total: parseFloat(r.total) || 0,
+              comision: parseFloat(r.comision) || 0, neto: parseFloat(r.neto) || 0,
+              pasajeros: [] };
+          }
+          docMap[key].pasajeros.push(r.pasajero || '');
+        });
+        var docs = Object.values(docMap);
+        _reporteCache = docs;
+
+        // Tarjetas de resumen
+        var totalBoletos = docs.length;
+        var totalCobrado = docs.reduce(function(a, d) { return a + d.total; }, 0);
+        var totalComision = docs.reduce(function(a, d) { return a + d.comision; }, 0);
+        var totalNeto = docs.reduce(function(a, d) { return a + d.neto; }, 0);
+
+        // Desglose por counter
+        var byCounter = {};
+        docs.forEach(function(d) {
+          var c = d.counter || 'Sin counter';
+          if (!byCounter[c]) byCounter[c] = { boletos:0, total:0, comision:0, neto:0 };
+          byCounter[c].boletos++;
+          byCounter[c].total += d.total;
+          byCounter[c].comision += d.comision;
+          byCounter[c].neto += d.neto;
+        });
+
+        // Detalle ordenado por fecha asc
+        var docsOrd = docs.slice().sort(function(a, b) {
+          var d1 = _parseFecha(a.fecha) || new Date(0);
+          var d2 = _parseFecha(b.fecha) || new Date(0);
+          return d1 - d2;
+        });
+
+        var thStyle = 'background:var(--fondo);padding:10px 12px;text-align:left;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;border-bottom:2px solid var(--borde);white-space:nowrap;';
+        var tdStyle = 'padding:9px 12px;border-bottom:1px solid var(--borde);font-size:12px;';
+        var tdR = 'padding:9px 12px;border-bottom:1px solid var(--borde);font-size:12px;text-align:right;';
+
+        var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px;">' +
+          '<div class="stat-card"><span>Boletos emitidos</span><h2>' + totalBoletos + '</h2></div>' +
+          '<div class="stat-card"><span>Total cobrado</span><h2>$ ' + totalCobrado.toFixed(2) + '</h2></div>' +
+          '<div class="stat-card"><span>Comisión</span><h2>$ ' + totalComision.toFixed(2) + '</h2></div>' +
+          '<div class="stat-card"><span>Neto</span><h2>$ ' + totalNeto.toFixed(2) + '</h2></div>' +
+          '</div>';
+
+        // Tabla por counter
+        html += '<h3 style="font-size:14px;font-weight:700;color:var(--primario);margin-bottom:10px;">Desglose por Counter</h3>';
+        html += '<div style="overflow-x:auto;margin-bottom:24px;"><table style="width:100%;border-collapse:collapse;">';
+        html += '<thead><tr><th style="' + thStyle + '">Counter</th><th style="' + thStyle + 'text-align:right;">Boletos</th><th style="' + thStyle + 'text-align:right;">Total Cobrado</th><th style="' + thStyle + 'text-align:right;">Comisión</th><th style="' + thStyle + 'text-align:right;">Neto</th></tr></thead><tbody>';
+        Object.keys(byCounter).forEach(function(c) {
+          var x = byCounter[c];
+          html += '<tr><td style="' + tdStyle + 'font-weight:600;">' + c + '</td><td style="' + tdR + '">' + x.boletos + '</td><td style="' + tdR + '">$ ' + x.total.toFixed(2) + '</td><td style="' + tdR + '">$ ' + x.comision.toFixed(2) + '</td><td style="' + tdR + '">$ ' + x.neto.toFixed(2) + '</td></tr>';
+        });
+        html += '<tr style="background:var(--fondo);font-weight:700;"><td style="' + tdStyle + '">TOTALES</td><td style="' + tdR + '">' + totalBoletos + '</td><td style="' + tdR + '">$ ' + totalCobrado.toFixed(2) + '</td><td style="' + tdR + '">$ ' + totalComision.toFixed(2) + '</td><td style="' + tdR + '">$ ' + totalNeto.toFixed(2) + '</td></tr>';
+        html += '</tbody></table></div>';
+
+        // Tabla de detalle
+        html += '<h3 style="font-size:14px;font-weight:700;color:var(--primario);margin-bottom:10px;">Detalle de Documentos</h3>';
+        html += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;min-width:700px;">';
+        html += '<thead><tr><th style="' + thStyle + '">Fecha</th><th style="' + thStyle + '">N° Doc</th><th style="' + thStyle + '">Comprador</th><th style="' + thStyle + '">Ruta</th><th style="' + thStyle + '">Pasajeros</th><th style="' + thStyle + 'text-align:right;">Total</th><th style="' + thStyle + 'text-align:right;">Comisión</th><th style="' + thStyle + 'text-align:right;">Neto</th><th style="' + thStyle + '">Counter</th></tr></thead><tbody>';
+        docsOrd.forEach(function(d) {
+          html += '<tr><td style="' + tdStyle + '">' + (d.fecha||'') + '</td><td style="' + tdStyle + 'font-weight:600;">' + (d.numDoc||'') + '</td><td style="' + tdStyle + '">' + (d.titular||'') + '</td><td style="' + tdStyle + '">' + (d.ruta||'') + '</td><td style="' + tdStyle + 'font-size:11px;">' + d.pasajeros.join(', ') + '</td><td style="' + tdR + '">$ ' + d.total.toFixed(2) + '</td><td style="' + tdR + '">$ ' + d.comision.toFixed(2) + '</td><td style="' + tdR + '">$ ' + d.neto.toFixed(2) + '</td><td style="' + tdStyle + '">' + (d.counter||'') + '</td></tr>';
+        });
+        html += '</tbody></table></div>';
+
+        cont.innerHTML = html;
+      } catch (err) {
+        cont.innerHTML = '<p style="color:#ef4444;padding:20px;">❌ Error: ' + (err.message||'') + '</p>';
+      }
+    }
+
+    function exportarReporteCSV() {
+      if (!_reporteCache || _reporteCache.length === 0) { alert('Genera el reporte primero.'); return; }
+      var mes = document.getElementById('rep-mes').value;
+      var anio = document.getElementById('rep-anio').value;
+      var nombreMes = MESES_REPORTE[parseInt(mes)-1] || mes;
+      var headers = ['FECHA','N°DOC','COMPRADOR','RUTA','TOTAL','COMISION','NETO','COUNTER'];
+      var col = function(v) { return '"' + String(v||'').replace(/"/g,'""') + '"'; };
+      var csv = headers.join(',') + '\n';
+      _reporteCache.forEach(function(d) {
+        csv += [col(d.fecha), col(d.numDoc), col(d.titular), col(d.ruta), d.total.toFixed(2), d.comision.toFixed(2), d.neto.toFixed(2), col(d.counter)].join(',') + '\n';
+      });
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'KillaTravel_Reporte_' + nombreMes + '_' + anio + '.csv';
+      a.click(); URL.revokeObjectURL(url);
     }
 
     function actualizarIndicadorSesion(nombre) {
@@ -3323,13 +3850,52 @@
       document.getElementById('login-pin-input').value = '';
       document.getElementById('login-error').textContent = '';
       document.getElementById('pantalla-login').style.display = 'flex';
-      // Restaurar sidebar completo
+      // Restaurar sidebar completo (ocultar nav-misventas al cerrar sesión)
       ['nav-balance','nav-emitir','nav-boletos','nav-alertas','nav-pasajeros','nav-datos'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = '';
       });
+      var mv = document.getElementById('nav-misventas');
+      if (mv) mv.style.display = 'none';
     }
   </script>
 </body>
+
+<!-- MODAL REPORTE MENSUAL -->
+<div id="modalReporteMensual" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;place-items:center;padding:20px;">
+  <div style="background:white;border-radius:20px;width:100%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 25px 60px rgba(0,0,0,0.4);">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:22px 28px;border-bottom:1px solid var(--borde);flex-shrink:0;">
+      <div>
+        <h2 style="margin:0;font-size:18px;font-weight:800;color:var(--primario);">&#128202; Reporte Mensual</h2>
+        <p style="margin:4px 0 0;font-size:12px;color:var(--texto-gris);">Resumen financiero por mes — Solo admin</p>
+      </div>
+      <button onclick="cerrarReporteMensual()" style="background:var(--fondo);border:1px solid var(--borde);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--texto-gris);">&#10005; Cerrar</button>
+    </div>
+    <!-- Selectores -->
+    <div style="display:flex;align-items:center;gap:12px;padding:18px 28px;border-bottom:1px solid var(--borde);flex-wrap:wrap;flex-shrink:0;">
+      <select id="rep-mes" style="padding:9px 14px;border:2px solid var(--borde-notorio);border-radius:8px;font-size:13px;font-weight:600;background:#fff;color:#1e293b;outline:none;">
+        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+      </select>
+      <select id="rep-anio" style="padding:9px 14px;border:2px solid var(--borde-notorio);border-radius:8px;font-size:13px;font-weight:600;background:#fff;color:#1e293b;outline:none;">
+        <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
+      </select>
+      <button onclick="generarReporte()" style="background:var(--primario);color:white;border:none;padding:10px 22px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;">&#9654; Generar Reporte</button>
+      <span style="margin-left:auto;font-size:12px;color:var(--texto-gris);font-style:italic;" id="rep-titulo-mes"></span>
+    </div>
+    <!-- Contenido scrollable -->
+    <div id="reporte-contenido" style="flex:1;overflow-y:auto;padding:24px 28px;">
+      <p style="color:var(--texto-gris);text-align:center;">Selecciona mes y año, luego pulsa Generar Reporte.</p>
+    </div>
+    <!-- Footer -->
+    <div style="display:flex;gap:12px;justify-content:flex-end;padding:16px 28px;border-top:1px solid var(--borde);flex-shrink:0;">
+      <button onclick="exportarReporteCSV()" style="background:var(--exito);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;">&#8681; Exportar CSV</button>
+      <button onclick="cerrarReporteMensual()" style="background:var(--fondo);border:1px solid var(--borde);padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;color:var(--texto-gris);">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 </html>
