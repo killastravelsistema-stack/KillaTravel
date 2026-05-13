@@ -2127,6 +2127,19 @@
                 document.getElementById('pax-container').innerHTML = '';
                 agregarFilaPax();
                 cargarStats();
+
+                // Restaurar counter automático si es counter
+                var usuario = window._usuarioActivo || {};
+                var selectStaff = document.getElementById('i_staff');
+                if (selectStaff && usuario.rol === 'counter') {
+                    var opcs = Array.from(selectStaff.options);
+                    var match = opcs.find(function(o) { 
+                        return o.value === usuario.nombre || 
+                               o.text === usuario.nombre; 
+                    });
+                    if (match) selectStaff.value = match.value;
+                    selectStaff.disabled = true;
+                }
             } catch (err) {
                 console.error('❌ Error al guardar venta:', err);
                 alert('❌ Error al guardar: ' + (err.message || String(err)));
