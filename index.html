@@ -1791,6 +1791,9 @@
             actualizarFechaHoy();
             // El login se muestra primero; la app se carga al autenticarse
             if (typeof lucide !== 'undefined') lucide.createIcons();
+            setInterval(function() {
+                _supa.auth.getSession().catch(function(){});
+            }, 1620000);
         };
 
         function actualizarFechaHoy() {
@@ -1885,6 +1888,9 @@
         //  SINCRONIZAR AHORA (mejorado con validación)
         // ═══════════════════════════════════════════
         async function sincronizarAhora() {
+            try {
+                await _supa.auth.getSession();
+            } catch(e) {}
             const status = document.getElementById('sync-status');
             if (status) { status.innerHTML = '&#9679; Sincronizando...'; status.style.color = '#3b82f6'; }
             try {
