@@ -2860,6 +2860,16 @@
         }
 
         async function cargarDatos() {
+            // Sincronizar banners según estado admin al entrar a la sección
+            var bannerLock = document.getElementById('banner-datos-lock');
+            var bannerUnlock = document.getElementById('banner-datos-unlock');
+            if (_adminDesbloqueado) {
+                if (bannerLock) bannerLock.style.display = 'none';
+                if (bannerUnlock) bannerUnlock.style.display = 'flex';
+            } else {
+                if (bannerLock) bannerLock.style.display = 'flex';
+                if (bannerUnlock) bannerUnlock.style.display = 'none';
+            }
             document.getElementById('lista-datos').innerHTML =
                 '<tr><td colspan="20" style="padding:40px;text-align:center;color:var(--texto-gris);">Cargando...</td></tr>';
             try {
@@ -2895,6 +2905,8 @@
             // Banner de bloqueo para montos admin
             var bannerDatos = document.getElementById('banner-datos-lock');
             if (bannerDatos) bannerDatos.style.display = _adminDesbloqueado ? 'none' : 'flex';
+            var bannerUnlock2 = document.getElementById('banner-datos-unlock');
+            if (bannerUnlock2) bannerUnlock2.style.display = _adminDesbloqueado ? 'flex' : 'none';
 
             var OCULTO = '<span style="filter:blur(4px);user-select:none;letter-spacing:2px;">●●●●●</span>';
             var td = function (val, align) {
