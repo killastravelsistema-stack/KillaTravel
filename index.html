@@ -1337,7 +1337,7 @@
                                     COBRADO $</th>
                                 <th
                                     style="width:85px; background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">
-                                    IMP.IND.$</th>
+                                    TOTAL DOC.$</th>
                                 <th
                                     style="width:90px; background:var(--fondo);padding:12px 10px;text-align:center;font-weight:700;font-size:10px;color:#10b981;text-transform:uppercase;white-space:nowrap;">
                                     EDITAR</th>
@@ -1481,7 +1481,7 @@
                                     COBRADO $</th>
                                 <th
                                     style="width:85px;background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">
-                                    IMP.IND.$</th>
+                                    TOTAL DOC.$</th>
                                 <th
                                     style="width:90px;background:var(--fondo);padding:12px 10px;text-align:center;font-weight:700;font-size:10px;color:#10b981;text-transform:uppercase;white-space:nowrap;">
                                     EDITAR</th>
@@ -2949,9 +2949,10 @@
 
                 var nd = r.numero_doc || 'SIN_DOC';
                 var splitBy = countMap[nd] || 1;
-                var rComision = parseFloat(r.comision) || 0;
-                var rNeto = parseFloat(r.neto) || 0;
+                var rComision = (parseFloat(r.comision) || 0) / splitBy;
+                var rNeto = (parseFloat(r.neto) || 0) / splitBy;
                 var rTotal = parseFloat(r.total) || 0;
+                var rIndividual = parseFloat(r.importe_individual) || 0;
 
                 var comVal = _adminDesbloqueado ? ('$ ' + rComision.toFixed(2)) : OCULTO;
                 var netVal = _adminDesbloqueado ? ('$ ' + rNeto.toFixed(2)) : OCULTO;
@@ -2981,8 +2982,8 @@
                     td(nac || '') +
                     td(comVal, 'right') +
                     td(netVal, 'right') +
+                    td(_adminDesbloqueado ? ('$ ' + rIndividual.toFixed(2)) : OCULTO, 'right') +
                     td(totVal, 'right') +
-                    td('$ ' + parseFloat(r.importe_individual || 0).toFixed(2), 'right') +
                     '<td style="padding:8px;border-bottom:1px solid var(--borde);text-align:center;">' +
                     '<button onclick="abrirEditar(' + r.id + ')" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;margin-bottom:5px;">Editar</button>' +
                     '<br><label style="font-size:10px; cursor:pointer; color:#0369a1; font-weight:700; display:flex; align-items:center; justify-content:center; gap:4px;"><input type="checkbox" onclick="toggleVerificado(' + r.id + ', this.checked)" ' + (String(r.observacion || '').includes('[✓ REVISADO]') ? 'checked' : '') + '> OK</label>' +
@@ -3592,13 +3593,14 @@
 
                 var nd = r.numero_doc || 'SIN_DOC';
                 var splitBy = countMap[nd] || 1;
-                var rComision = parseFloat(r.comision) || 0;
-                var rNeto = parseFloat(r.neto) || 0;
+                var rComision = (parseFloat(r.comision) || 0) / splitBy;
+                var rNeto = (parseFloat(r.neto) || 0) / splitBy;
                 var rTotal = parseFloat(r.total) || 0;
+                var rIndividual = parseFloat(r.importe_individual) || 0;
                 var comVal = _adminDesbloqueado ? ('$ ' + rComision.toFixed(2)) : OCULTO;
                 var netVal = _adminDesbloqueado ? ('$ ' + rNeto.toFixed(2)) : OCULTO;
                 var totVal = _adminDesbloqueado ? ('<b>$ ' + rTotal.toFixed(2) + '</b>') : OCULTO;
-                var impVal = _adminDesbloqueado ? ('$ ' + parseFloat(r.importe_individual || 0).toFixed(2)) : OCULTO;
+                var impVal = _adminDesbloqueado ? ('$ ' + rIndividual.toFixed(2)) : OCULTO;
 
                 var fsal = fmtFecha(r.fecha_salida);
                 var fret = fmtFecha(r.fecha_retorno);
@@ -3626,8 +3628,8 @@
                     td(nac || '') +
                     td(comVal, 'right') +
                     td(netVal, 'right') +
-                    td(totVal, 'right') +
                     td(impVal, 'right') +
+                    td(totVal, 'right') +
                     '<td style="padding:8px;border-bottom:1px solid var(--borde);text-align:center;">' +
                     '<button onclick="abrirEditarCounter(' + r.id + ')" style="background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;margin-bottom:5px;">Editar</button>' +
                     '<br><label style="font-size:10px;cursor:pointer;color:#0369a1;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px;"><input type="checkbox" onclick="toggleVerificado(' + r.id + ', this.checked)" ' + (String(r.observacion || '').includes('[✓ REVISADO]') ? 'checked' : '') + '> OK</label>' +
