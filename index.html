@@ -910,6 +910,8 @@
                         G</div>
                     <span id="session-nombre"
                         style="font-size:13px;font-weight:600;color:var(--primario);">Usuario</span>
+                    <button onclick="abrirCambiarPin()"
+                        style="background:none;border:1px solid var(--acento);color:var(--acento);padding:5px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;" title="Cambiar mi PIN">&#128273; PIN</button>
                     <button onclick="cerrarSesion()"
                         style="background:none;border:1px solid var(--borde);color:var(--texto-gris);padding:5px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;">Salir</button>
                 </div>
@@ -3834,6 +3836,15 @@
             'Jonatan Rodr\u00edguez': { pin: '3301', rol: 'admin' },
             'Counter Nuevo': { pin: '4401', rol: 'counter' }
         };
+        // Aplicar PINs guardados en localStorage (si existen)
+        (function() {
+            try {
+                var saved = JSON.parse(localStorage.getItem('kt_pins') || '{}');
+                Object.keys(saved).forEach(function(u) {
+                    if (_USUARIOS_CONFIG[u]) _USUARIOS_CONFIG[u].pin = saved[u];
+                });
+            } catch(e) {}
+        })();
 
         var _loginUsuarioTemp = '';
 
@@ -4055,6 +4066,69 @@
             if (nm) nm.textContent = nombre;
         }
 
+        function abrirCambiarPin() {
+            if (!window._usuarioActivo) return;
+            document.getElementById('cpin-actual').value = '';
+            document.getElementById('cpin-nuevo').value = '';
+            document.getElementById('cpin-confirmar').value = '';
+            document.getElementById('cpin-error').textContent = '';
+            document.getElementById('cpin-ok').style.display = 'none';
+            document.getElementById('modalCambiarPin').style.display = 'grid';
+            setTimeout(function() { document.getElementById('cpin-actual').focus(); }, 100);
+        }
+
+        function cerrarCambiarPin() {
+            document.getElementById('modalCambiarPin').style.display = 'none';
+        }
+
+        function confirmarCambiarPin() {
+            var nombre = window._usuarioActivo ? window._usuarioActivo.nombre : '';
+            if (!nombre || !_USUARIOS_CONFIG[nombre]) return;
+            var pinActual = document.getElementById('cpin-actual').value.trim();
+            var pinNuevo = document.getElementById('cpin-nuevo').value.trim();
+            var pinConf = document.getElementById('cpin-confirmar').value.trim();
+            var errEl = document.getElementById('cpin-error');
+            var okEl = document.getElementById('cpin-ok');
+            errEl.textContent = '';
+            okEl.style.display = 'none';
+            if (pinActual !== _USUARIOS_CONFIG[nombre].pin) {
+                errEl.textContent = '\u274c PIN actual incorrecto.';
+                document.getElementById('cpin-actual').value = '';
+                document.getElementById('cpin-actual').focus();
+                return;
+            }
+            if (!/^\d{4}$/.test(pinNuevo)) {
+                errEl.textContent = '\u274c El nuevo PIN debe tener exactamente 4 d\u00edgitos.';
+                document.getElementById('cpin-nuevo').focus();
+                return;
+            }
+            if (pinNuevo !== pinConf) {
+                errEl.textContent = '\u274c Los PINs nuevos no coinciden.';
+                document.getElementById('cpin-confirmar').value = '';
+                document.getElementById('cpin-confirmar').focus();
+                return;
+            }
+            if (pinNuevo === pinActual) {
+                errEl.textContent = '\u274c El nuevo PIN debe ser diferente al actual.';
+                document.getElementById('cpin-nuevo').value = '';
+                document.getElementById('cpin-nuevo').focus();
+                return;
+            }
+            _USUARIOS_CONFIG[nombre].pin = pinNuevo;
+            // Persistir en localStorage
+            try {
+                var saved = JSON.parse(localStorage.getItem('kt_pins') || '{}');
+                saved[nombre] = pinNuevo;
+                localStorage.setItem('kt_pins', JSON.stringify(saved));
+            } catch(e) {}
+            okEl.textContent = '\u2705 PIN actualizado correctamente.';
+            okEl.style.display = 'block';
+            document.getElementById('cpin-actual').value = '';
+            document.getElementById('cpin-nuevo').value = '';
+            document.getElementById('cpin-confirmar').value = '';
+            setTimeout(function() { cerrarCambiarPin(); }, 1800);
+        }
+
         function cerrarSesion() {
             window._usuarioActivo = null;
             _adminDesbloqueado = false;
@@ -4082,6 +4156,48 @@
         }
     </script>
 </body>
+
+<!-- MODAL CAMBIAR PIN -->
+<div id="modalCambiarPin"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9998;place-items:center;padding:20px;">
+    <div
+        style="background:white;border-radius:20px;padding:36px 32px;width:100%;max-width:360px;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 25px 60px rgba(0,0,0,0.4);">
+        <div style="text-align:center;margin-bottom:22px;">
+            <div style="font-size:36px;margin-bottom:8px;">&#128273;</div>
+            <h2 style="margin:0;font-size:19px;font-weight:800;color:var(--primario);">Cambiar mi PIN</h2>
+            <p style="margin:6px 0 0;font-size:12px;color:var(--texto-gris);" id="cpin-usuario-label">Ingresa tu PIN actual y uno nuevo</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+                <label style="font-size:12px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;letter-spacing:.5px;">PIN Actual</label>
+                <input type="password" id="cpin-actual" maxlength="4" placeholder="&bull;&bull;&bull;&bull;"
+                    style="width:100%;font-size:28px;text-align:center;padding:10px;border:2px solid var(--borde);border-radius:12px;outline:none;letter-spacing:8px;margin-top:6px;transition:border-color .2s;"
+                    oninput="this.style.borderColor='var(--acento)'"
+                    onkeypress="if(event.key==='Enter') document.getElementById('cpin-nuevo').focus()">
+            </div>
+            <div>
+                <label style="font-size:12px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;letter-spacing:.5px;">Nuevo PIN</label>
+                <input type="password" id="cpin-nuevo" maxlength="4" placeholder="&bull;&bull;&bull;&bull;"
+                    style="width:100%;font-size:28px;text-align:center;padding:10px;border:2px solid var(--borde);border-radius:12px;outline:none;letter-spacing:8px;margin-top:6px;transition:border-color .2s;"
+                    oninput="this.style.borderColor='var(--acento)'"
+                    onkeypress="if(event.key==='Enter') document.getElementById('cpin-confirmar').focus()">
+            </div>
+            <div>
+                <label style="font-size:12px;font-weight:700;color:var(--texto-gris);text-transform:uppercase;letter-spacing:.5px;">Confirmar Nuevo PIN</label>
+                <input type="password" id="cpin-confirmar" maxlength="4" placeholder="&bull;&bull;&bull;&bull;"
+                    style="width:100%;font-size:28px;text-align:center;padding:10px;border:2px solid var(--borde);border-radius:12px;outline:none;letter-spacing:8px;margin-top:6px;transition:border-color .2s;"
+                    oninput="this.style.borderColor='var(--acento)'"
+                    onkeypress="if(event.key==='Enter') confirmarCambiarPin()">
+            </div>
+            <div id="cpin-error" style="color:var(--peligro);font-size:13px;font-weight:600;text-align:center;min-height:18px;"></div>
+            <div id="cpin-ok" style="display:none;color:var(--exito);font-size:13px;font-weight:700;text-align:center;"></div>
+            <button onclick="confirmarCambiarPin()"
+                style="width:100%;padding:14px;background:var(--primario);color:white;border:none;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;">Guardar nuevo PIN</button>
+            <button onclick="cerrarCambiarPin()"
+                style="width:100%;padding:10px;background:none;border:none;color:var(--texto-gris);font-size:13px;cursor:pointer;font-weight:600;">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- MODAL REPORTE MENSUAL -->
 <div id="modalReporteMensual"
