@@ -1337,7 +1337,7 @@
                                     COBRADO $</th>
                                 <th
                                     style="width:85px; background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">
-                                    TOTAL DOC.$</th>
+                                    TOTAL NETO DOC.$</th>
                                 <th
                                     style="width:90px; background:var(--fondo);padding:12px 10px;text-align:center;font-weight:700;font-size:10px;color:#10b981;text-transform:uppercase;white-space:nowrap;">
                                     EDITAR</th>
@@ -1482,7 +1482,7 @@
                                     COBRADO $</th>
                                 <th
                                     style="width:85px;background:var(--fondo);padding:12px 10px;text-align:right;font-weight:700;font-size:10px;color:var(--texto-gris);text-transform:uppercase;white-space:nowrap;">
-                                    TOTAL DOC.$</th>
+                                    TOTAL NETO DOC.$</th>
                                 <th
                                     style="width:90px;background:var(--fondo);padding:12px 10px;text-align:center;font-weight:700;font-size:10px;color:#10b981;text-transform:uppercase;white-space:nowrap;">
                                     EDITAR</th>
@@ -2904,7 +2904,7 @@
                 var d1 = _parseFecha(a.fecha) || new Date(0);
                 var d2 = _parseFecha(b.fecha) || new Date(0);
                 if (d1.getTime() === d2.getTime()) return (a.correlativo || 0) - (b.correlativo || 0); // Stable sort fallback
-                return d1 - d2;
+                return d2 - d1;
             });
 
             var totalRegistros = sortedRows.length;
@@ -2975,12 +2975,12 @@
                 var splitBy = countMap[nd] || 1;
                 var rComision = (parseFloat(r.comision) || 0) / splitBy;
                 var rNeto = (parseFloat(r.neto) || 0) / splitBy;
-                var rTotal = parseFloat(r.total) || 0;
+                var rTotalDoc = (parseFloat(r.neto) || 0) * splitBy;
                 var rIndividual = parseFloat(r.importe_individual) || 0;
 
                 var comVal = _adminDesbloqueado ? ('$ ' + rComision.toFixed(2)) : OCULTO;
                 var netVal = _adminDesbloqueado ? ('$ ' + rNeto.toFixed(2)) : OCULTO;
-                var totVal = _adminDesbloqueado ? ('<b>$ ' + rTotal.toFixed(2) + '</b>') : OCULTO;
+                var totVal = _adminDesbloqueado ? ('<b>$ ' + rTotalDoc.toFixed(2) + '</b>') : OCULTO;
 
                 var colorSal = calcColor(r.fecha_salida);
                 var colorRet = calcColor(r.fecha_retorno);
@@ -3664,11 +3664,11 @@
                 var splitBy = countMap[nd] || 1;
                 var rComision = (parseFloat(r.comision) || 0) / splitBy;
                 var rNeto = (parseFloat(r.neto) || 0) / splitBy;
-                var rTotal = parseFloat(r.total) || 0;
+                var rTotalDoc = (parseFloat(r.neto) || 0) * splitBy;
                 var rIndividual = parseFloat(r.importe_individual) || 0;
                 var comVal = _adminDesbloqueado ? ('$ ' + rComision.toFixed(2)) : OCULTO;
                 var netVal = _adminDesbloqueado ? ('$ ' + rNeto.toFixed(2)) : OCULTO;
-                var totVal = _adminDesbloqueado ? ('<b>$ ' + rTotal.toFixed(2) + '</b>') : OCULTO;
+                var totVal = _adminDesbloqueado ? ('<b>$ ' + rTotalDoc.toFixed(2) + '</b>') : OCULTO;
                 var impVal = _adminDesbloqueado ? ('$ ' + rIndividual.toFixed(2)) : OCULTO;
 
                 var fsal = fmtFecha(r.fecha_salida);
