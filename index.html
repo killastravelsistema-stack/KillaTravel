@@ -1717,12 +1717,24 @@
         //  FETCH VENTAS desde Supabase
         // ═══════════════════════════════════════════
         async function _fetchVentas(query) {
-            var { data, error } = await _supa
-                .from('ventas')
-                .select('*')
-                .order('correlativo', { ascending: true })
-                .order('id', { ascending: true });
-            if (error) throw error;
+            let allData = [];
+            let from = 0;
+            let hasMore = true;
+            while(hasMore) {
+                var { data, error } = await _supa
+                    .from('ventas')
+                    .select('*')
+                    .order('correlativo', { ascending: true })
+                    .order('id', { ascending: true })
+                    .range(from, from + 999);
+                if (error) throw error;
+                if (data && data.length > 0) {
+                    allData = allData.concat(data);
+                    if (data.length < 1000) hasMore = false;
+                    else from += 1000;
+                } else hasMore = false;
+            }
+            var data = allData;
             var mapa = {};
             (data || []).forEach(function (f) {
                 var nd = f.numero_doc || ''; if (!nd) return;
@@ -2877,13 +2889,24 @@
             document.getElementById('lista-datos').innerHTML =
                 '<tr><td colspan="20" style="padding:40px;text-align:center;color:var(--texto-gris);">Cargando...</td></tr>';
             try {
-                var { data, error } = await _supa
-                    .from('ventas')
-                    .select('*')
-                    .order('correlativo', { ascending: true })
-                    .order('id', { ascending: true });
-                if (error) throw error;
-                window._datosRowsCache = data || [];
+                let allData = [];
+                let from = 0;
+                let hasMore = true;
+                while(hasMore) {
+                    var { data, error } = await _supa
+                        .from('ventas')
+                        .select('*')
+                        .order('correlativo', { ascending: true })
+                        .order('id', { ascending: true })
+                        .range(from, from + 999);
+                    if (error) throw error;
+                    if (data && data.length > 0) {
+                        allData = allData.concat(data);
+                        if (data.length < 1000) hasMore = false;
+                        else from += 1000;
+                    } else hasMore = false;
+                }
+                window._datosRowsCache = allData || [];
                 renderDatos(window._datosRowsCache);
             } catch (err) {
                 document.getElementById('lista-datos').innerHTML =
@@ -3212,29 +3235,42 @@
             }
         }
 
-        function exportarCSV() {
-            _supa.from('ventas').select('*').order('correlativo', { ascending: false }).order('id', { ascending: true })
-                .then(function (res) {
-                    var rows = res.data || [];
-                    if (!rows.length) { alert('No hay datos para exportar'); return; }
-                    var headers = ['N° Documento', 'Fecha Emision', 'Comprador', 'DNI/RUC', 'Pasajero', 'Cod. Reserva', 'Aerolinea', 'Ruta', 'F. Salida', 'F. Retorno', 'Celular', 'Direccion', 'Tipo Servicio', 'Counter', 'Metodo de Pago', 'F. Nacimiento', 'Comision $', 'Neto $', 'Total Cobrado $', 'Importe Individual $'];
-                    var csv = headers.join(';') + '\n';
-                    rows.forEach(function (r) {
-                        var nac = String(r.fecha_nacimiento || '').trim();
-                        if (/^\d{4}-\d{2}-\d{2}$/.test(nac)) { var p = nac.split('-'); nac = p[2] + '/' + p[1] + '/' + p[0]; }
-                        var fsal = String(r.fecha_salida || '').trim();
-                        if (/^\d{4}-\d{2}-\d{2}$/.test(fsal)) { var p = fsal.split('-'); fsal = p[2] + '/' + p[1] + '/' + p[0]; }
-                        var fret = String(r.fecha_retorno || '').trim();
-                        if (/^\d{4}-\d{2}-\d{2}$/.test(fret)) { var p = fret.split('-'); fret = p[2] + '/' + p[1] + '/' + p[0]; }
-                        var col = function (v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; };
-                        csv += [col(r.numero_doc), col(r.fecha), col(r.titular), col(r.dni_ruc), col(r.pasajero), col(r.codigo_reserva), col(r.aerolinea), col(r.ruta), col(fsal), col(fret), col(r.celular), col(r.direccion), col(r.tipo_emision), col(r.counter), col(r.metodo_pago), col(nac), r.comision, r.neto, r.total, r.importe_individual].join(';') + '\n';
-                    });
-                    var blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-                    var url = URL.createObjectURL(blob);
-                    var a = document.createElement('a');
-                    a.href = url; a.download = 'KillaTravel_Datos_' + new Date().toISOString().slice(0, 10) + '.csv';
-                    a.click(); URL.revokeObjectURL(url);
+        async function exportarCSV() {
+            try {
+                let allData = [];
+                let from = 0;
+                let hasMore = true;
+                while(hasMore) {
+                    var { data, error } = await _supa.from('ventas').select('*').order('correlativo', { ascending: false }).order('id', { ascending: true }).range(from, from + 999);
+                    if (error) throw error;
+                    if (data && data.length > 0) {
+                        allData = allData.concat(data);
+                        if (data.length < 1000) hasMore = false;
+                        else from += 1000;
+                    } else hasMore = false;
+                }
+                var rows = allData || [];
+                if (!rows.length) { alert('No hay datos para exportar'); return; }
+                var headers = ['N° Documento', 'Fecha Emision', 'Comprador', 'DNI/RUC', 'Pasajero', 'Cod. Reserva', 'Aerolinea', 'Ruta', 'F. Salida', 'F. Retorno', 'Celular', 'Direccion', 'Tipo Servicio', 'Counter', 'Metodo de Pago', 'F. Nacimiento', 'Comision $', 'Neto $', 'Total Cobrado $', 'Importe Individual $'];
+                var csv = headers.join(';') + '\n';
+                rows.forEach(function (r) {
+                    var nac = String(r.fecha_nacimiento || '').trim();
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(nac)) { var p = nac.split('-'); nac = p[2] + '/' + p[1] + '/' + p[0]; }
+                    var fsal = String(r.fecha_salida || '').trim();
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(fsal)) { var p = fsal.split('-'); fsal = p[2] + '/' + p[1] + '/' + p[0]; }
+                    var fret = String(r.fecha_retorno || '').trim();
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(fret)) { var p = fret.split('-'); fret = p[2] + '/' + p[1] + '/' + p[0]; }
+                    var col = function (v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; };
+                    csv += [col(r.numero_doc), col(r.fecha), col(r.titular), col(r.dni_ruc), col(r.pasajero), col(r.codigo_reserva), col(r.aerolinea), col(r.ruta), col(fsal), col(fret), col(r.celular), col(r.direccion), col(r.tipo_emision), col(r.counter), col(r.metodo_pago), col(nac), r.comision, r.neto, r.total, r.importe_individual].join(';') + '\n';
                 });
+                var blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url; a.download = 'KillaTravel_Datos_' + new Date().toISOString().slice(0, 10) + '.csv';
+                a.click(); URL.revokeObjectURL(url);
+            } catch (err) {
+                alert('Error al exportar: ' + (err.message || String(err)));
+            }
         }
 
         // ═══════════════════════════════════════════
@@ -3578,14 +3614,25 @@
                 return;
             }
             try {
-                const { data, error } = await _supa
-                    .from('ventas')
-                    .select('*')
-                    .eq('counter', usuario.nombre)
-                    .order('correlativo', { ascending: false })
-                    .order('id', { ascending: false });
-                if (error) throw error;
-                window._misVentasCache = data || [];
+                let allData = [];
+                let from = 0;
+                let hasMore = true;
+                while(hasMore) {
+                    const { data, error } = await _supa
+                        .from('ventas')
+                        .select('*')
+                        .eq('counter', usuario.nombre)
+                        .order('correlativo', { ascending: false })
+                        .order('id', { ascending: false })
+                        .range(from, from + 999);
+                    if (error) throw error;
+                    if (data && data.length > 0) {
+                        allData = allData.concat(data);
+                        if (data.length < 1000) hasMore = false;
+                        else from += 1000;
+                    } else hasMore = false;
+                }
+                window._misVentasCache = allData || [];
                 renderMisVentas(window._misVentasCache);
             } catch (err) {
                 lista.innerHTML = '<tr><td colspan="21" style="padding:40px;text-align:center;color:#ef4444;">❌ Error: ' + (err.message || '') + '</td></tr>';
@@ -3953,9 +4000,19 @@
             _reporteMesNombre = MESES_REPORTE[mes - 1] + ' ' + anio;
 
             try {
-                var { data, error } = await _supa.from('ventas').select('*').eq('anulado', false).order('correlativo', { ascending: true });
-                if (error) throw error;
-                var rows = data || [];
+                let allData = [];
+                let from = 0;
+                let hasMore = true;
+                while(hasMore) {
+                    var { data, error } = await _supa.from('ventas').select('*').eq('anulado', false).order('correlativo', { ascending: true }).range(from, from + 999);
+                    if (error) throw error;
+                    if (data && data.length > 0) {
+                        allData = allData.concat(data);
+                        if (data.length < 1000) hasMore = false;
+                        else from += 1000;
+                    } else hasMore = false;
+                }
+                var rows = allData || [];
 
                 // Filtrar por mes/año usando _parseFecha
                 var delMes = rows.filter(function (r) {
