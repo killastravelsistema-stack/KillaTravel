@@ -785,11 +785,10 @@
                 <p style="color:var(--texto-gris);font-size:13px;text-align:center;margin-bottom:24px;">Selecciona tu
                     nombre para continuar</p>
                 <div style="display:flex;flex-direction:column;gap:10px;">
-                    <button class="login-user-btn" onclick="seleccionarUsuario('Guissel Luna')">Guissel Luna</button>
+                    <button class="login-user-btn" onclick="seleccionarUsuario('GUISSEL LUNA')">GUISSEL LUNA</button>
                     <button class="login-user-btn" onclick="seleccionarUsuario('SULLCA NAVARRO ANABEL')">SULLCA NAVARRO ANABEL</button>
-                    <button class="login-user-btn" onclick="seleccionarUsuario('Jonatan Rodríguez')">Jonatan
-                        Rodríguez</button>
-                    <button class="login-user-btn" onclick="seleccionarUsuario('Counter Nuevo')">Counter Nuevo</button>
+                    <button class="login-user-btn" onclick="seleccionarUsuario('JONATAN RODRÍGUEZ')">JONATAN RODRÍGUEZ</button>
+                    <button class="login-user-btn" onclick="seleccionarUsuario('LUZ ESCOBAR')">LUZ ESCOBAR</button>
                 </div>
             </div>
             <!-- Paso 2: Ingreso de PIN -->
@@ -1123,8 +1122,9 @@
                             <select id="i_staff">
                                 <option value="">Seleccionar...</option>
                                 <option>SULLCA NAVARRO ANABEL</option>
-                                <option>Guissel Luna</option>
-                                <option>Jonatan Rodríguez</option>
+                                <option>GUISSEL LUNA</option>
+                                <option>JONATAN RODRÍGUEZ</option>
+                                <option>LUZ ESCOBAR</option>
                                 <option>Otro</option>
                             </select>
                         </div>
@@ -2886,7 +2886,7 @@
                 '<b>ADMINISTRADORA: GUISELL CARLA LUNA QUISPE.</b>';
 
             const numDocStr = v.numeroDoc || ((v.serie || '001') + ' - N°' + String(v.correlativo || 1).padStart(6, '0'));
-            const subtitulo = v.tipo === 'BOLETOS AÉREOS' ? 'REMISIÓN DE BOLETO AÉREO' :
+            const subtitulo = v.tipo === 'BOLETOS AÉREOS' ? 'EMISIÓN DE BOLETO AÉREO' :
                 v.tipo === 'REMISIÓN' ? 'REMISIÓN' :
                     v.tipo === 'PAQUETES TURÍSTICOS' ? 'REMISIÓN DE PAQUETE TURÍSTICO' :
                         v.tipo === 'SEGUROS DE VIAJE' ? 'REMISIÓN DE SEGURO DE VIAJE' :
@@ -4049,10 +4049,10 @@
         //  CAMBIO 4+5+6: LOGIN, PERMISOS Y SESIÓN
         // ═════════════════════════════════════════════
         var _USUARIOS_CONFIG = {
-            'Guissel Luna': { pin: '1305', rol: 'counter' },
+            'GUISSEL LUNA': { pin: '1305', rol: 'counter' },
             'SULLCA NAVARRO ANABEL': { pin: '2201', rol: 'counter' },
-            'Jonatan Rodr\u00edguez': { pin: '3301', rol: 'admin' },
-            'Counter Nuevo': { pin: '4401', rol: 'counter' }
+            'JONATAN RODRÍGUEZ': { pin: '3301', rol: 'admin' },
+            'LUZ ESCOBAR': { pin: '4401', rol: 'counter' }
         };
         // Cargar PINs personalizados guardados (clave v2 para evitar datos corruptos anteriores)
         (function () {
