@@ -1072,7 +1072,7 @@
                         </div>
                         <div class="campo">
                             <label>Celular</label>
-                            <input type="text" id="i_cel" maxlength="9" required>
+                            <input type="text" id="i_cel" maxlength="12" required>
                         </div>
                         <div class="campo" style="grid-column: span 2;">
                             <label>Oficina / Dirección</label>
@@ -1702,7 +1702,7 @@
     <div id="modalTicket" class="modal-ticket">
         <div style="display:flex; flex-direction:column; align-items:center;">
             <div class="ticket-papel" id="area-print"></div>
-            <div style="margin-top:20px; display:flex; gap:15px; justify-content:center;" class="no-print">
+            <div style="margin-top:20px; display:flex; gap:15px; justify-content:center; flex-wrap:wrap;" class="no-print">
                 <button onclick="imprimirTicket()"
                     style="padding:18px 40px; background:var(--exito); color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer; font-size:16px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
                     <span style="display:flex; align-items:center; gap:10px;">
@@ -1713,6 +1713,18 @@
                             <rect x="6" y="14" width="12" height="8"></rect>
                         </svg>
                         IMPRIMIR
+                    </span>
+                </button>
+                <button onclick="guardarPDFTicket()"
+                    style="padding:18px 40px; background:#0ea5e9; color:white; border:none; border-radius:12px; font-weight:700; cursor:pointer; font-size:16px; box-shadow: 0 4px 12px rgba(14,165,233,0.3);">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                        GUARDAR PDF
                     </span>
                 </button>
                 <button onclick="document.getElementById('modalTicket').style.display='none'"
@@ -2974,6 +2986,59 @@
                     iframe.contentWindow.focus();
                     iframe.contentWindow.print();
                     setTimeout(function () { document.body.removeChild(iframe); }, 1000);
+                }, 250);
+            };
+        }
+
+        // ═══════════════════════════════════════════
+        //  GUARDAR PDF (tamaño ticket 80mm)
+        // ═══════════════════════════════════════════
+        function guardarPDFTicket() {
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'absolute';
+            iframe.style.width = '0px';
+            iframe.style.height = '0px';
+            iframe.style.border = 'none';
+            document.body.appendChild(iframe);
+
+            const iframeDoc = iframe.contentWindow.document;
+            const printStyles =
+                '<style>' +
+                '@page{size:80mm auto;margin:0;}' +
+                'html,body{margin:0;padding:0;width:80mm;}' +
+                '*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important;}' +
+                '.ticket-papel{width:76mm;background:white;padding:4mm 3mm 2mm 3mm;color:#000!important;font-family:Arial,sans-serif;line-height:1.05;margin:0;}' +
+                '.t-header{text-align:center;font-size:7pt;margin:0;padding:0;line-height:1.1;}' +
+                '.t-header b{font-size:8.5pt;}' +
+                '.t-header img{margin:0 0 2px 0;padding:0;display:block;}' +
+                '.t-dots{border-top:1.5pt dotted #000;margin:4px 0;}' +
+                '.t-title{text-align:center;font-weight:bold;font-size:10.5pt;margin:3px 0;line-height:1.1;}' +
+                '.t-subtitle{text-align:center;font-weight:bold;font-size:8.5pt;margin:3px 0 5px 0;text-transform:uppercase;}' +
+                '.t-row{display:flex;font-size:8pt;margin-bottom:1px;}' +
+                '.t-label{width:90px;font-weight:bold;}' +
+                '.t-valor{color:#000!important;}' +
+                '.t-tabla{width:100%;border-collapse:collapse;margin:5px 0 4px 0;font-size:7.5pt;border:none;}' +
+                '.t-tabla th{text-align:left;border:none;border-bottom:1pt solid #000;padding:2px 3px;font-weight:bold;}' +
+                '.t-tabla td{padding:2px 3px;border:none;vertical-align:top;color:#000!important;}' +
+                '.t-tabla tr:not(:last-child) td{border-bottom:1pt dotted #ccc;}' +
+                '.t-total-box{text-align:right;font-weight:bold;font-size:10.5pt;margin:4px 0;color:#000!important;}' +
+                '.t-conditions{font-size:5.5pt;text-align:justify;margin:5px 0 0 0;line-height:1.05;border-top:1pt solid #000;padding:4px 0 0 0;color:#000!important;font-weight:700;}' +
+                '.qr-container{text-align:center;margin:4px 0 1mm 0;padding:0;}' +
+                '.qr-img{width:50px;height:50px;object-fit:contain;margin:0;padding:0;display:inline-block;}' +
+                '</style>';
+
+            iframeDoc.write('<html><head>' + printStyles + '</head><body>');
+            iframeDoc.write('<div class="ticket-papel">' + document.getElementById('area-print').innerHTML + '</div>');
+            iframeDoc.write('</body></html>');
+            iframeDoc.close();
+
+            iframe.onload = function () {
+                setTimeout(function () {
+                    iframe.contentWindow.focus();
+                    // Pequeño aviso antes de abrir el diálogo
+                    alert('💡 En el diálogo de impresión:\n1. Destino → "Guardar como PDF"\n2. Más opciones → Tamaño de papel: Personalizado 80 x 200 mm\n3. Márgenes: Ninguno\n\n¡Clic OK para continuar!');
+                    iframe.contentWindow.print();
+                    setTimeout(function () { document.body.removeChild(iframe); }, 1500);
                 }, 250);
             };
         }
